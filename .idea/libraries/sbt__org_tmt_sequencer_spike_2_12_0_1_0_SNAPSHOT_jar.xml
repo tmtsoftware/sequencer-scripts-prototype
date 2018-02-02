@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="sbt: org.tmt:sequencer-spike_2.12:0.1.0-SNAPSHOT:jar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.ivy2/local/org.tmt/sequencer-spike_2.12/0.1.0-SNAPSHOT/jars/sequencer-spike_2.12.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$USER_HOME$/.ivy2/local/org.tmt/sequencer-spike_2.12/0.1.0-SNAPSHOT/docs/sequencer-spike_2.12-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.ivy2/local/org.tmt/sequencer-spike_2.12/0.1.0-SNAPSHOT/srcs/sequencer-spike_2.12-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
