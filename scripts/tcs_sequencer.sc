@@ -3,9 +3,9 @@ import tmt.sequencer.ScriptImports._
 
 import scala.collection.mutable
 
-println()
+init[TcsSequencer]
 
-class Tcs(cs: CommandService) extends Script(cs) {
+class TcsSequencer(cs: CommandService) extends Script(cs) {
 
   var results: mutable.Buffer[CommandResult] = mutable.Buffer.empty
 

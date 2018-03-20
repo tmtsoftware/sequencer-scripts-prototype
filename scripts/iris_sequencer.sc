@@ -3,9 +3,9 @@ import $file.helpers
 
 import scala.collection.mutable
 
-println()
+init[IrisSequencer]
 
-class Iris(cs: CommandService) extends Script(cs) {
+class IrisSequencer(cs: CommandService) extends Script(cs) {
 
   var results: mutable.Buffer[CommandResult] = mutable.Buffer.empty
 

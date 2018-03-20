@@ -1,6 +1,6 @@
 import tmt.sequencer.ScriptImports._
-import $file.iris_helper
-import $file.tcs_helper
+import $file.iris_sequencer
+import $file.tcs_sequencer
 import $file.helpers
 import scala.collection.mutable
 
@@ -9,8 +9,8 @@ init[OcsSequencer]
 class OcsSequencer(cs: CommandService) extends Script(cs) {
 
   var results: mutable.Buffer[CommandResult] = mutable.Buffer.empty
-  val iris = new iris_helper.Iris(cs)
-  val tcs = new tcs_helper.Tcs(cs)
+  val iris = new iris_sequencer.IrisSequencer(cs)
+  val tcs = new tcs_sequencer.TcsSequencer(cs)
 
   override def onSetup(command: Command): CommandResult = {
     if (command.name == "setup-iris") {
