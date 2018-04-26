@@ -1,3 +1,5 @@
+package tmt.sequencer.scripts.tcs
+
 import tmt.sequencer.ScriptImports._
 
 object TcsFactory {

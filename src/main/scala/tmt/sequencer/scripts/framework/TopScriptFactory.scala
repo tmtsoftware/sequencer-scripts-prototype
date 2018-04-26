@@ -1,3 +1,8 @@
+package tmt.sequencer.scripts.framework
+
+import tmt.sequencer.scripts.iris.IrisFactory
+import tmt.sequencer.scripts.ocs.OcsFactory
+import tmt.sequencer.scripts.tcs.TcsFactory
 import tmt.sequencer.ScriptImports._
 import tmt.sequencer.dsl.ScriptFactory
 

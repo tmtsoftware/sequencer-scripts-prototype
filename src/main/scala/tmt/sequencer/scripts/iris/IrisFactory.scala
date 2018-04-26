@@ -1,3 +1,5 @@
+package tmt.sequencer.scripts.iris
+
 import tmt.sequencer.ScriptImports._
 
 object IrisFactory {

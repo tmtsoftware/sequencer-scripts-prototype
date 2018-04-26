@@ -1,3 +1,5 @@
+package tmt.sequencer.scripts.ocs
+
 import tmt.sequencer.ScriptImports._
 
 object OcsFactory {

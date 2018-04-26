@@ -1,8 +1,10 @@
+package tmt.sequencer.scripts.tcs
+
 import tmt.sequencer.ScriptImports._
 
 class TcsDarkNight(cs: CswServices) extends Script(cs) {
 
-  var eventCount = 0
+  var eventCount   = 0
   var commandCount = 0
 
   cs.handleCommand("setup-tcs") { command =>
@@ -10,7 +12,7 @@ class TcsDarkNight(cs: CswServices) extends Script(cs) {
       println(s"[Tcs] Received command: ${command.name}")
 
       val firstAssemblyResponse = cs.setup("tcs-assembly1", command.withId(Id(s"${command.id}a"))).await
-      val commandFailed = firstAssemblyResponse.isInstanceOf[CommandResponse.Failed]
+      val commandFailed         = firstAssemblyResponse.isInstanceOf[CommandResponse.Failed]
 
       val restAssemblyResponses = if (commandFailed) {
         Set(cs.setup("tcs-assembly2", command.withId(Id(s"${command.id}c"))).await)
