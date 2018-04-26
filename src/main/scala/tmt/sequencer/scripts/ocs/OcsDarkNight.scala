@@ -4,8 +4,6 @@ import tmt.sequencer.ScriptImports._
 
 class OcsDarkNight(cs: CswServices) extends Script(cs) {
 
-  println("-------------------------------->>> DEV MODE")
-
   val iris = cs.sequenceProcessor("iris")
   val tcs  = cs.sequenceProcessor("tcs")
 
