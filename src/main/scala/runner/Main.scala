@@ -1,10 +1,9 @@
 package runner
 
-import tmt.sequencer.ScriptRunner
+import tmt.sequencer.SequencerApp
 
 object Main {
   def main(args: Array[String]): Unit = {
-    val scriptUnderTest = "scripts/iris_sequencer.sc"
-    ScriptRunner.run(scriptUnderTest, isProd = false)
+    SequencerApp.main(Array("iris", "darknight", "8000", "false"))
   }
 }
