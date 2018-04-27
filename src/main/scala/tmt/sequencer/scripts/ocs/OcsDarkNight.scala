@@ -4,8 +4,8 @@ import tmt.sequencer.ScriptImports._
 
 class OcsDarkNight(cs: CswServices) extends Script(cs) {
 
-  val iris = cs.sequenceProcessor("iris")
-  val tcs  = cs.sequenceProcessor("tcs")
+  val iris = cs.sequenceProcessor("IrisDarkNight")
+  val tcs  = cs.sequenceProcessor("TcsDarkNight")
 
   var eventCount   = 0
   var commandCount = 0
