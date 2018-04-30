@@ -1,22 +1,25 @@
 package tmt.sequencer.scripts.ocs
 
+import akka.actor.Cancellable
+import akka.stream.KillSwitch
 import tmt.sequencer.ScriptImports._
+import tmt.sequencer.api.SequenceFeeder
 
 class OcsDarkNight(cs: CswServices) extends Script(cs) {
 
-  val iris = cs.sequenceProcessor("IrisDarkNight")
-  val tcs  = cs.sequenceProcessor("TcsDarkNight")
+  val iris: SequenceFeeder = cs.sequenceProcessor("iris")
+  val tcs: SequenceFeeder  = cs.sequenceProcessor("tcs")
 
   var eventCount   = 0
   var commandCount = 0
 
-  val subscription = cs.subscribe("ocs") { event =>
+  val subscription: KillSwitch = cs.subscribe("ocs") { event =>
     eventCount = eventCount + 1
     println(s"------------------> received-event: ${event.value} on key: ${event.key}")
     Done
   }
 
-  val cancellable = cs.publish(16.seconds) {
+  val cancellable: Cancellable = cs.publish(16.seconds) {
     SequencerEvent("ocs-metadata", (eventCount + commandCount).toString)
   }
 
