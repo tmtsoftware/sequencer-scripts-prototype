@@ -8,7 +8,11 @@ lazy val root = (project in file("."))
       version := "0.1.0-SNAPSHOT"
     )),
     name := "sequencer-scripts",
-    libraryDependencies ++= Seq(Libs.`sequencer-framework`),
+    libraryDependencies ++= Seq(
+      Libs.`sequencer-framework`,
+      Libs.`scalaTest`,
+      Libs.`mockito-core`,
+    ),
     publishTo := {
       val base = "http://localhost:4000/maven/"
       if (version.value.endsWith("SNAPSHOT")) Some("snapshots" at base + "snapshots")
