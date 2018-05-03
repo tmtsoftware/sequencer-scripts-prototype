@@ -1,25 +1,32 @@
 package tmt.sequencer.scripts
 
+import akka.Done
+import akka.actor.ActorSystem
+import akka.stream.{ActorMaterializer, KillSwitch, Materializer}
+import akka.testkit.TestKit
 import akka.util.Timeout
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
-import org.scalatest.AsyncFunSuite
+import org.scalatest.AsyncFunSuiteLike
 import org.scalatest.mockito.MockitoSugar
+import tmt.sequencer.ScriptImports.SequencerEvent
 import tmt.sequencer.api.SequenceFeeder
 import tmt.sequencer.dsl.{CswServices, FunctionBuilder}
 import tmt.sequencer.models.CommandResponse.Success
-import tmt.sequencer.models.{AggregateResponse, Command, CommandList, Id}
+import tmt.sequencer.models._
 import tmt.sequencer.scripts.ocs.OcsDarkNight
 
-import scala.concurrent.Future
 import scala.concurrent.duration._
+import scala.concurrent.{ExecutionContext, Future}
 
-class OcsDarkNightTest extends AsyncFunSuite with MockitoSugar {
+class OcsDarkNightTest extends TestKit(ActorSystem("test-system")) with AsyncFunSuiteLike with MockitoSugar {
 
   private implicit val timeout: Timeout = Timeout(1.seconds)
+  implicit val mat: Materializer        = ActorMaterializer()
 
-  val mockedCsWServices: CswServices                                             = mock[CswServices]
-  val mockedSequenceFeeder: SequenceFeeder                                       = mock[SequenceFeeder]
+  val mockedCsWServices: CswServices       = mock[CswServices]
+  val mockedSequenceFeeder: SequenceFeeder = mock[SequenceFeeder]
+
   val commandHandlerBuilder: FunctionBuilder[Command, Future[AggregateResponse]] = new FunctionBuilder
 
   val inputCommandSequence = CommandList(
@@ -48,8 +55,9 @@ class OcsDarkNightTest extends AsyncFunSuite with MockitoSugar {
   test("OcsDarkNight Script running only setup-iris") {
 
     when(mockedCsWServices.commandHandlerBuilder).thenReturn(commandHandlerBuilder)
-    when(mockedCsWServices.handleCommand(anyString()) { any() }).thenCallRealMethod()
-    when(mockedCsWServices.nextIf(any())).thenReturn(
+    when(mockedCsWServices.handleCommand(anyString()) { any[Function1[Command, Future[AggregateResponse]]]() })
+      .thenCallRealMethod()
+    when(mockedCsWServices.nextIf(any[Function1[Command, Boolean]]())).thenReturn(
       Future.successful(Some(Command(Id("B"), "setup-iris", List())))
     )
     when(mockedCsWServices.sequenceProcessor("iris")).thenReturn(mockedSequenceFeeder)
@@ -61,4 +69,17 @@ class OcsDarkNightTest extends AsyncFunSuite with MockitoSugar {
       assert(res === finalOcsResponse)
     }
   }
+
+  test("OcsDarkNight Script subscription") {
+
+    when(mockedCsWServices.subscribe(anyString()) { any[Function1[SequencerEvent, Done]]() } { any[ExecutionContext]() })
+      .thenAnswer { value =>
+        value.getArgument(1).asInstanceOf[Function1[SequencerEvent, Done]].apply(SequencerEvent("ocs", "1"))
+        mock[KillSwitch]
+      }
+
+    val ocs = new OcsDarkNight(mockedCsWServices)
+    assert(ocs.eventCount > 0)
+  }
+
 }

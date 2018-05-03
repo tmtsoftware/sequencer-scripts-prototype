@@ -1,6 +1,6 @@
 
 lazy val root = (project in file("."))
-  .enablePlugins(JavaAppPackaging)
+  .enablePlugins(JavaAppPackaging, ScoverageSbtPlugin)
   .settings(
     inThisBuild(List(
       organization := "org.tmt",
