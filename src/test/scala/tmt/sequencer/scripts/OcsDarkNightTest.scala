@@ -8,7 +8,7 @@ import org.scalatest.mockito.MockitoSugar
 import tmt.sequencer.api.SequenceFeeder
 import tmt.sequencer.dsl.{CswServices, FunctionBuilder}
 import tmt.sequencer.models.CommandResponse.Success
-import tmt.sequencer.models.{AggregateResponse, Command, Id}
+import tmt.sequencer.models.{AggregateResponse, Command, CommandList, Id}
 import tmt.sequencer.scripts.ocs.OcsDarkNight
 
 import scala.concurrent.Future
@@ -22,11 +22,13 @@ class OcsDarkNightTest extends AsyncFunSuite with MockitoSugar {
   val mockedSequenceFeeder: SequenceFeeder                                       = mock[SequenceFeeder]
   val commandHandlerBuilder: FunctionBuilder[Command, Future[AggregateResponse]] = new FunctionBuilder
 
-  val inputCommandSequence = List(
-    Command(Id("A1"), "setup-iris", List()),
-    Command(Id("A2"), "setup-iris", List()),
-    Command(Id("B1"), "setup-iris", List()),
-    Command(Id("B2"), "setup-iris", List())
+  val inputCommandSequence = CommandList(
+    List(
+      Command(Id("A1"), "setup-iris", List()),
+      Command(Id("A2"), "setup-iris", List()),
+      Command(Id("B1"), "setup-iris", List()),
+      Command(Id("B2"), "setup-iris", List())
+    )
   )
 
   val expectedIrisResponse = AggregateResponse(
