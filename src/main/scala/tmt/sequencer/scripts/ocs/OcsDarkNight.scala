@@ -3,8 +3,9 @@ package tmt.sequencer.scripts.ocs
 import akka.actor.Cancellable
 import akka.stream.KillSwitch
 import tmt.sequencer.ScriptImports._
-import tmt.sequencer.models.CommandList
 import tmt.sequencer.api.SequenceFeeder
+import tmt.sequencer.models.CommandList
+import tmt.sequencer.scripts.helpers.CommandListHelper
 
 class OcsDarkNight(cs: CswServices) extends Script(cs) {
 
@@ -28,18 +29,14 @@ class OcsDarkNight(cs: CswServices) extends Script(cs) {
     spawn {
       val maybeCommandB = cs.nextIf(c => c.name == "setup-iris").await
       val subCommandsB = if (maybeCommandB.isDefined) {
-        val commandB     = maybeCommandB.get
-        val subCommandB1 = commandB.withId(Id(s"${commandB.id}1"))
-        val subCommandB2 = commandB.withId(Id(s"${commandB.id}2"))
-        CommandList(Seq(subCommandB1, subCommandB2))
+        val commandB = maybeCommandB.get
+        CommandListHelper.getSubCommandList(commandB)
       } else CommandList.empty
 
       println(s"[Ocs] Received commandA: ${commandA.name}")
-      val subCommandA1 = commandA.withId(Id(s"${commandA.id}1"))
-      val subCommandA2 = commandA.withId(Id(s"${commandA.id}2"))
 
-      val subCommandsA = CommandList(Seq(subCommandA1, subCommandA2))
-      val commandList  = subCommandsA.add(subCommandsB)
+      val subCommandsA = CommandListHelper.getSubCommandList(commandA)
+      val commandList  = CommandListHelper.addCommandList(subCommandsA, subCommandsB)
 
       val response = iris.feed(commandList).await.markSuccessful(commandA).markSuccessful(maybeCommandB)
 
@@ -52,19 +49,14 @@ class OcsDarkNight(cs: CswServices) extends Script(cs) {
     spawn {
       val maybeCommandD = cs.nextIf(c2 => c2.name == "setup-iris-tcs").await
       val tcsSequence = if (maybeCommandD.isDefined) {
-        val nextCommand  = maybeCommandD.get
-        val subCommandD1 = nextCommand.withName("setup-tcs").withId(Id(s"${nextCommand.id}1"))
-        val subCommandD2 = nextCommand.withName("setup-tcs").withId(Id(s"${nextCommand.id}2"))
-        CommandList(Seq(subCommandD1, subCommandD2))
+        val nextCommand = maybeCommandD.get
+        CommandListHelper.getSubCommandList(nextCommand, "setup-tcs")
       } else {
         CommandList.empty
       }
 
       println(s"[Ocs] Received commandC: ${commandC.name}")
-      val subCommandC1 = commandC.withName("setup-iris").withId(Id(s"${commandC.id}1"))
-      val subCommandC2 = commandC.withName("setup-iris").withId(Id(s"${commandC.id}2"))
-      val irisSequence = CommandList(Seq(subCommandC1, subCommandC2))
-
+      val irisSequence = CommandListHelper.getSubCommandList(commandC, "setup-iris")
       val aggregateResponse = parAggregate(
         iris.feed(irisSequence),
         tcs.feed(tcsSequence)

@@ -4,7 +4,6 @@ object Libs {
   val version               = "0.1.0-SNAPSHOT"
   val `sequencer-framework` = "org.tmt" %% "sequencer-framework" % version
   val `scalaTest`           = "org.scalatest" %% "scalatest" % "3.0.4" % Test
-  val `mockito-core`        = "org.mockito" % "mockito-core" % "2.16.0" % Test //MIT License
 }
 
 object Akka {

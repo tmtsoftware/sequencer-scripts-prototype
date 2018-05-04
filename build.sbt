@@ -11,7 +11,6 @@ lazy val root = (project in file("."))
     libraryDependencies ++= Seq(
       Libs.`sequencer-framework`,
       Libs.`scalaTest`,
-      Libs.`mockito-core`,
     ),
     publishTo := {
       val base = "http://localhost:4000/maven/"
