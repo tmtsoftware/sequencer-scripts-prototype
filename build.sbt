@@ -7,7 +7,6 @@ lazy val scripts = project
       scalaVersion := "2.12.4",
       version := "0.1.0-SNAPSHOT"
     )),
-    name := "sequencer-scripts",
     libraryDependencies ++= Seq(
       Libs.`sequencer-framework`,
       Libs.`scalaTest`,
