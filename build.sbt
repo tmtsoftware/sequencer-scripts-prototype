@@ -1,5 +1,5 @@
 
-lazy val root = (project in file("."))
+lazy val scripts = project
   .enablePlugins(JavaAppPackaging, ScoverageSbtPlugin)
   .settings(
     inThisBuild(List(
@@ -18,4 +18,3 @@ lazy val root = (project in file("."))
       else Some("releases" at base + "releases")
     }
   )
-
