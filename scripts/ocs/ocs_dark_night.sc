@@ -11,7 +11,7 @@ class OcsDarkNight(cs: CswServices) extends Script(cs) {
 
   val subscription = cs.subscribe("ocs") { event =>
     eventCount = eventCount + 1
-    println(s"------------------> received-event: ${event.value} on key: ${event.key}")
+    println(s"==================> received-event: ${event.value} on key: ${event.key}")
     Done
   }
 
