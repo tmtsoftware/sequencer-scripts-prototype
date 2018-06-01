@@ -1,4 +1,4 @@
-package tmt.sequencer.runner
+package runner
 
 import tmt.sequencer.SequencerApp
 
