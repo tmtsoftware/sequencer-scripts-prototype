@@ -1,13 +1,13 @@
 
-lazy val root = (project in file(".")).
-  settings(
+lazy val runner = project
+  .enablePlugins(JavaAppPackaging)
+  .settings(
     inThisBuild(List(
       organization := "org.tmt",
       scalaVersion := "2.12.4",
-      version      := "0.1.0-SNAPSHOT"
+      version := "0.1.0-SNAPSHOT"
     )),
-    name := "sequencer-scripts",
-    libraryDependencies += "org.tmt" %% "sequencer-framework" % "0.1.0-SNAPSHOT",
+    libraryDependencies += Libs.`sequencer-framework`,
     resolvers += "jitpack" at "https://jitpack.io",
     mappings in Universal ++= {
       val scriptsDirectory = baseDirectory.value / "scripts"
@@ -15,4 +15,4 @@ lazy val root = (project in file(".")).
         case (file, relativePath) => file -> s"scripts/$relativePath"
       }
     }
-).enablePlugins(JavaAppPackaging)
+  ).enablePlugins(JavaAppPackaging)
