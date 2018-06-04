@@ -9,10 +9,4 @@ lazy val runner = project
     )),
     libraryDependencies += Libs.`sequencer-framework`,
     resolvers += "jitpack" at "https://jitpack.io",
-    mappings in Universal ++= {
-      val scriptsDirectory = baseDirectory.value / "scripts"
-      scriptsDirectory.allPaths pair Path.relativeTo(scriptsDirectory) map {
-        case (file, relativePath) => file -> s"scripts/$relativePath"
-      }
-    }
-  ).enablePlugins(JavaAppPackaging)
+  )
