@@ -9,15 +9,17 @@ class TcsDarkNight(cs: CswServices) extends Script(cs) {
 
   cs.handleCommand("setup-tcs") { command =>
     spawn {
-      println(s"[Tcs] Received command: ${command.name}")
+      println(s"[Tcs] Received command: ${command.commandName}")
 
-      val firstAssemblyResponse = cs.setup("tcs-assembly1", command.withId(Id(s"${command.id}a"))).await
-      val commandFailed         = firstAssemblyResponse.isInstanceOf[CommandResponse.Failed]
+      val firstAssemblyResponse = cs.setup("Sample1Assembly", command).await
+      val commandFailed         = firstAssemblyResponse.isInstanceOf[CommandResponse.Error]
 
       val restAssemblyResponses = if (commandFailed) {
-        Set(cs.setup("tcs-assembly2", command.withId(Id(s"${command.id}c"))).await)
+        val command2 = Setup(Prefix("test-command2"), CommandName("setup-tcs"), Some(ObsId("test-obsId")))
+        Set(cs.setup("Sample1Assembly", command2).await)
       } else {
-        Set(cs.setup("tcs-assembly3", command.withId(Id(s"${command.id}b"))).await)
+        val command3 = Setup(Prefix("test-command3"), CommandName("setup-tcs"), Some(ObsId("test-obsId")))
+        Set(cs.setup("Sample1Assembly", command3).await)
       }
 
       val response = AggregateResponse
