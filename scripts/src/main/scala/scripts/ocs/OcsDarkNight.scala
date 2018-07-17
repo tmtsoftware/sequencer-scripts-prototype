@@ -29,7 +29,7 @@ class OcsDarkNight(cs: CswServices) extends Script(cs) {
         CommandList.from(commandB, commandB1)
       } else CommandList.empty
 
-      println(s"[Ocs] Received commandA: ${commandA.commandName}")
+      println(s"[Ocs] Received command: ${commandA.commandName}")
 
       val commandList = subCommandsB.add(commandA)
 
@@ -50,7 +50,7 @@ class OcsDarkNight(cs: CswServices) extends Script(cs) {
         CommandList.empty
       }
 
-      println(s"[Ocs] Received commandC: ${commandC.commandName}")
+      println(s"[Ocs] Received command: ${commandC.commandName}")
       val irisSequence = CommandList.from(commandC)
 
       val aggregateResponse = parAggregate(
