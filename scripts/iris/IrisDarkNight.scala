@@ -1,4 +1,4 @@
-package scripts.iris
+package iris
 
 import tmt.sequencer.ScriptImports._
 

@@ -1,5 +1,3 @@
-package runner
-
 import tmt.sequencer.SequencerApp
 
 object Main {

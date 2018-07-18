@@ -1,4 +1,4 @@
-package scripts.helpers
+package helpers
 
 import org.scalatest.FunSuite
 import tmt.sequencer.ScriptImports._

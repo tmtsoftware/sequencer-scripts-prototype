@@ -1,4 +1,4 @@
-package scripts.ocs
+package ocs
 
 import tmt.sequencer.ScriptImports._
 

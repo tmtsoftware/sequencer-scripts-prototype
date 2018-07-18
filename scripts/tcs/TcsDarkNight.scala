@@ -1,4 +1,4 @@
-package scripts.tcs
+package tcs
 
 import tmt.sequencer.ScriptImports._
 
