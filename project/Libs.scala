@@ -1,8 +1,10 @@
 import sbt._
 
 object Libs {
-  val version               = "0.1.0-SNAPSHOT"
-  val `sequencer-framework` = "org.tmt" %% "sequencer-framework" % version
+  private val Org     = "com.github.tmtsoftware.esw-prototype"
+  private val Version = "9d53637"
+
+  val `sequencer-framework` = Org %% "sequencer-framework" % Version
   val `scalaTest`           = "org.scalatest" %% "scalatest" % "3.0.4" % Test
 }
 
