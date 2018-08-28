@@ -1,6 +1,8 @@
 import sbt._
 
 object Libs {
+//  private val Org     = "org.tmt"
+//  private val Version = "0.1-SNAPSHOT"
   private val Org     = "com.github.tmtsoftware.esw-prototype"
   private val Version = "9d53637"
 
