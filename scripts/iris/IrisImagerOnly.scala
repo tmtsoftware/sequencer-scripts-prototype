@@ -1,6 +1,5 @@
 package iris
 
-import csw.messages.commands.CommandIssue
 import csw.messages.commands.CommandIssue.UnsupportedCommandIssue
 import csw.messages.params.generics.KeyType
 import csw.messages.params.models.Units
@@ -13,7 +12,7 @@ class IrisImagerOnly(csw: CswServices) extends Script(csw) {
   csw.handleCommand("setupObservation") { command =>
     spawn {
       command match {
-        case c: Setup => {
+        case c: Setup =>
           // parse
           val filterKey = KeyType.StringKey.make("filter")
           val filter = c(filterKey).head
@@ -55,7 +54,6 @@ class IrisImagerOnly(csw: CswServices) extends Script(csw) {
             csw.submit("imager-detector-assembly", setupImagerCommand)
           ).await
           AggregateResponse(response)
-        }
         case x => AggregateResponse(Set(CommandResponse.Invalid(x.runId, UnsupportedCommandIssue("Only Setup commands are supported."))))
       }
     }
@@ -64,11 +62,10 @@ class IrisImagerOnly(csw: CswServices) extends Script(csw) {
   csw.handleCommand("setObserverKeywords") { command =>
     spawn {
       command match {
-        case c: Setup => {
+        case c: Setup =>
           // args to command match event
           csw.publish(SystemEvent(thisPrefix, EventName("observerKeywords")).add(c.paramSet))
           AggregateResponse(Set(CommandResponse.Completed(c.runId)))
-        }
         case x => AggregateResponse(Set(CommandResponse.Invalid(x.runId, UnsupportedCommandIssue("Only Setup commands are supported."))))
       }
     }
