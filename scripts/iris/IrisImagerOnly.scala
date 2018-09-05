@@ -9,6 +9,7 @@ class IrisImagerOnly(csw: CswServices) extends Script(csw) {
 
   private val thisPrefix = Prefix("iris.ici.is")
 
+
   csw.handleSetupCommand("setupObservation") { command =>
     spawn {
       // parse
@@ -46,8 +47,8 @@ class IrisImagerOnly(csw: CswServices) extends Script(csw) {
         .add(setupImagerRampKey.set(ramps))
 
       var response = par(
-        csw.submit("sci-filter-assembly", filterCommand),
-        csw.submit("imager-detector-assembly", setupImagerCommand)
+        csw.submitAndSubscribe("sci-filter-assembly", filterCommand),
+        csw.submitAndSubscribe("imager-detector-assembly", setupImagerCommand)
       ).await
       AggregateResponse(response)
     }
@@ -56,7 +57,7 @@ class IrisImagerOnly(csw: CswServices) extends Script(csw) {
   csw.handleSetupCommand("setObserverKeywords") { command =>
     spawn {
       // args to command match event
-      csw.publish(SystemEvent(thisPrefix, EventName("observerKeywords")).add(command.paramSet))
+      csw.publish(SystemEvent(thisPrefix, EventName("observerKeywords"), command.paramSet))
       AggregateResponse(Set(CommandResponse.Completed(command.runId)))
     }
   }
@@ -74,31 +75,17 @@ class IrisImagerOnly(csw: CswServices) extends Script(csw) {
   }
 
   private var takeImagerExposures = false
-  private var exposureInProgress = false
   private var maybeObsId: Option[ObsId] = None
   loop {
     spawn {
       if (takeImagerExposures) {
-        if (!exposureInProgress) {
-          val observeCommand = Observe(thisPrefix, CommandName("START_EXPOSURE"), maybeObsId)
-          val response = csw.submit("imager-detector-assembly", observeCommand).await
-          exposureInProgress = true
-          // wait for exposure to start.
-          loop {
-            spawn {
-              stopWhen(currentExposureInProgressEventValue)
-            }
-          }.await
-          // wait for exposure to finish.
-          loop {
-            spawn {
-              stopWhen(!currentExposureInProgressEventValue)
-            }
-          }.await
-          exposureInProgress = false
-        }
+        val observeCommand = Observe(thisPrefix, CommandName("START_EXPOSURE"), maybeObsId)
+        val response = csw.submitAndSubscribe("imager-detector-assembly", observeCommand).await
+        // check response
+
+        // check for failures
       }
-      stopWhen(false)  // loop forvever
+      stopWhen(false) // loop forever
     }
   }
 
