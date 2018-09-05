@@ -76,31 +76,30 @@ class IrisImagerOnly(csw: CswServices) extends Script(csw) {
   private var takeImagerExposures = false
   private var exposureInProgress = false
   private var maybeObsId: Option[ObsId] = None
-  spawn {
-    loop {
-      spawn {
-        if (takeImagerExposures) {
-          if (!exposureInProgress) {
-            val observeCommand = Observe(thisPrefix, CommandName("START_EXPOSURE"), maybeObsId)
-            val response = csw.submit("imager-detector-assembly", observeCommand).await
-            exposureInProgress = true
-            // wait for exposure to finish.
-            loop {
-              spawn {
-                stopWhen(currentExposureInProgressEventValue)
-              }
-            }.await
-            loop {
-              spawn {
-                stopWhen(!currentExposureInProgressEventValue)
-              }
-            }.await
-            exposureInProgress = false
-          }
+  loop {
+    spawn {
+      if (takeImagerExposures) {
+        if (!exposureInProgress) {
+          val observeCommand = Observe(thisPrefix, CommandName("START_EXPOSURE"), maybeObsId)
+          val response = csw.submit("imager-detector-assembly", observeCommand).await
+          exposureInProgress = true
+          // wait for exposure to start.
+          loop {
+            spawn {
+              stopWhen(currentExposureInProgressEventValue)
+            }
+          }.await
+          // wait for exposure to finish.
+          loop {
+            spawn {
+              stopWhen(!currentExposureInProgressEventValue)
+            }
+          }.await
+          exposureInProgress = false
         }
-        stopWhen(false)
       }
-    }.await
+      stopWhen(false)  // loop forvever
+    }
   }
 
   csw.handleObserveCommand("observe") { command =>
