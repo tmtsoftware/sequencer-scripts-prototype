@@ -20,7 +20,7 @@ class IrisDarkNight(cs: CswServices) extends Script(cs) {
       }.await
       println(s"[Iris] Received command: ${command.commandName}")
       val response = AggregateResponse
-        .add(firstAssemblyResponse)
+        .single(firstAssemblyResponse)
         .markSuccessful(command)
 
       cs.sendResult(s"[Iris] Received response: $response")
