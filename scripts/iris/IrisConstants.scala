@@ -7,7 +7,6 @@ import tmt.sequencer.ScriptImports.{EventKey, EventName, Prefix}
 
 object IrisConstants {
 
-
   val samplingModeChoices: Choices = makeChoices("CDS", "MCD", "UTR")
 
   def imagerFilterPositions(filter: String): List[String] = filter match {
