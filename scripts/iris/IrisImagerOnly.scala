@@ -10,6 +10,10 @@ class IrisImagerOnly(csw: CswServices) extends Script(csw) {
 
   csw.handleSetupCommand("setupObservation") { command =>
     spawn {
+      val source = command.source
+      val commandName = command.commandName
+      val obsId = maybeObsId
+
       val filter = command(is.command.filterKey).head.toString()
       val itime = command(is.command.itimeKey).head
       val ramps = command(is.command.rampsKey).head
@@ -33,7 +37,7 @@ class IrisImagerOnly(csw: CswServices) extends Script(csw) {
     spawn {
       // args to command match event
       csw.publish(SystemEvent(is.prefix, is.event.observerKeywordsEvent, command.paramSet)).await
-      AggregateResponse(Set(CommandResponse.Completed(command.runId)))
+      AggregateResponse(CommandResponse.Completed(command.runId))
     }
   }
 
@@ -107,7 +111,7 @@ class IrisImagerOnly(csw: CswServices) extends Script(csw) {
         case x =>
           CommandResponse.Invalid(command.runId, CommandIssue.ParameterValueOutOfRangeIssue("imagerObserve must be START, STOP, or ABORT"))
       }
-      AggregateResponse(Set(commandResponse))
+      AggregateResponse(commandResponse)
     }
   }
 
@@ -138,7 +142,7 @@ class IrisImagerOnly(csw: CswServices) extends Script(csw) {
           val observeCommand = Observe(is.prefix, CommandName("ABORT_EXPOSURE"), command.maybeObsId)
           csw.submitAndSubscribe(imagerDetectorAssembly.name, observeCommand).await
       }
-      AggregateResponse(Set(commandResponse))
+      AggregateResponse(commandResponse)
     }
   }
 
@@ -154,7 +158,7 @@ class IrisImagerOnly(csw: CswServices) extends Script(csw) {
 
       val observeCommand = Observe(is.prefix, CommandName(commandName), command.maybeObsId)
       val response = csw.submitAndSubscribe(imagerDetectorAssembly.name, observeCommand).await
-      AggregateResponse(Set(response))
+      AggregateResponse(response)
     }
   }
 
