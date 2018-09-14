@@ -1,7 +1,6 @@
 package iris
 
 import csw.messages.commands.CommandIssue
-import csw.messages.params.generics.Parameter
 import csw.messages.params.models.{Choice, Units}
 import iris.IrisConstants._
 import tmt.sequencer.ScriptImports._
@@ -10,21 +9,26 @@ class IrisImagerOnly(csw: CswServices) extends Script(csw) {
 
   csw.handleSetupCommand("setupObservation") { command =>
     spawn {
-      val source = command.source
-      val commandName = command.commandName
-      val obsId = maybeObsId
-
+      // extract info from incoming command
       val filter = command(is.command.filterKey).head.toString()
       val itime = command(is.command.itimeKey).head
       val ramps = command(is.command.rampsKey).head
 
-      val wheelTargetParameters: Set[Parameter[_]] = sciFilterAssembly.command.wheelKeys.zip(imagerFilterPositions(filter)).map(kv => kv._1.set(kv._2)).toSet
-      val filterCommand = Setup(is.prefix, CommandName("select"), command.maybeObsId, wheelTargetParameters)
+      // get filter target positions for each wheel based on filter in command
+      val filterPositions = imagerFilterPositions(filter)
+      // construct target parameters
+      val wheelTargetParameters = for ((key, filter)  <- sciFilterAssembly.command.wheelKeys.zip(filterPositions))
+        yield key.set(filter)
 
+      // construct filter command
+      val filterCommand = Setup(is.prefix, CommandName("select"), command.maybeObsId, wheelTargetParameters.toSet)
+
+      // construct command to set imager detector settings
       val setupImagerCommand = Setup(is.prefix, CommandName("LOAD_CONFIGURATION"), command.maybeObsId)
         .add(imagerDetectorAssembly.command.setupImagerItimeKey.set(itime).withUnits(Units.millisecond))
         .add(imagerDetectorAssembly.command.setupImagerRampKey.set(ramps))
 
+      // send both commands at same time
       var response = par(
         csw.submitAndSubscribe(sciFilterAssembly.name, filterCommand),
         csw.submitAndSubscribe(imagerDetectorAssembly.name, setupImagerCommand)
@@ -35,27 +39,30 @@ class IrisImagerOnly(csw: CswServices) extends Script(csw) {
 
   csw.handleSetupCommand("setObserverKeywords") { command =>
     spawn {
-      // args to command match event
+      // args to command match event.  simply reuse and pass on as event.
       csw.publish(SystemEvent(is.prefix, is.event.observerKeywordsEvent, command.paramSet)).await
       AggregateResponse(CommandResponse.Completed(command.runId))
     }
   }
 
+  // start a subscription to track exposure status (shown as an exampe, not currently used)
+  // note this is done in constuctor of Script, so it is always running (not part of a command).
   private val exposureStateEvent = EventKey(imagerDetectorAssembly.prefix, EventName("exposureState"))
   private var currentExposureInProgressEventValue = false
-
   csw.subscribe(Set(exposureStateEvent)) {
     case ev: SystemEvent =>
       currentExposureInProgressEventValue = ev(imagerDetectorAssembly.event.exposureInProgressKey).head
       Done
-    case _ => Done // ignore, shouldn't happen
+    case _ => Done // ignore, shouldn't happen since we aren't expecting an ObserveEvent
   }
 
-
-  private var allThermalStatesMap = collection.mutable.Map[String, Boolean]() ++= cryoenvAssembly.cryoenvStateEventNames.map(e => (e,true)).toMap  // map for storing flag for cold states
+  // map (EventName -> state) for storing flag for cold states.  Set default state values to true
+  private var allThermalStatesMap = collection.mutable.Map[String, Boolean]() ++= cryoenvAssembly.cryoenvStateEventNames.map(e => (e,true)).toMap
+  // set flag as Boolean And of all values in map.  Note this is defined as a method.
   private def okForExposures = allThermalStatesMap.values.forall(identity)
-
+  // create event keys from list of EventNames
   private val cryoenvStateEvents = cryoenvAssembly.cryoenvStateEventNames.map(name => EventKey(cryoenvAssembly.prefix, EventName(name)))
+  // subscription to watch
   csw.subscribe(cryoenvStateEvents) {
     case ev: SystemEvent =>
       val thisThermalState = ev(cryoenvAssembly.event.cryoenvVacuumStateKey).head
@@ -72,9 +79,12 @@ class IrisImagerOnly(csw: CswServices) extends Script(csw) {
         }
       }
       Done
-    case _ => Done // ignore, shouldn't happen
+    case _ => Done // ignore, shouldn't happen, since this is a SystemEvent
   }
 
+  // Start a loop in the contructor that is always running
+  // Take imager exposures while takeImagerExposures flag is set
+  // This flag is set on observe commands in the observe handler below
   private var takeImagerExposures = false
   private var maybeObsId: Option[ObsId] = None
   private var stopExposureLoop = false
@@ -85,7 +95,7 @@ class IrisImagerOnly(csw: CswServices) extends Script(csw) {
         val response = csw.submitAndSubscribe(imagerDetectorAssembly.name, observeCommand).await
         // check response
       }
-      stopWhen(stopExposureLoop) // loop forever
+      stopWhen(stopExposureLoop) // loop forever.  can be set to true on shutdown.
     }
   }
 
