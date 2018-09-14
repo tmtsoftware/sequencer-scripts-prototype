@@ -1,7 +1,7 @@
 package helpers
 
 import org.scalatest.FunSuite
-import tmt.sequencer.ScriptImports._
+import tmt.ocs.ScriptImports._
 
 class CommandListHelperTest extends FunSuite {
 

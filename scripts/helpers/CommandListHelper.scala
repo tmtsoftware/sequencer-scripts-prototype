@@ -1,6 +1,6 @@
 package helpers
 
-import tmt.sequencer.ScriptImports._
+import tmt.ocs.ScriptImports._
 
 object CommandListHelper {
 
