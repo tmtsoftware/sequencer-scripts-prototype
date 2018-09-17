@@ -14,7 +14,7 @@ lazy val `sequencer-scripts` = project
     name := "sequencer-scripts",
     resolvers += "jitpack" at "https://jitpack.io",
     libraryDependencies ++= Seq(
-      Libs.`sequencer-framework`,
+      Libs.`ocs-framework`,
       Libs.`scalaTest`,
     ),
     publishTo := {
