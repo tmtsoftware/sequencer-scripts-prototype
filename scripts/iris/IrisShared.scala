@@ -2,10 +2,11 @@ package iris
 
 import tmt.ocs.ScriptImports._
 
-class IrisDarkNight(cs: CswServices) extends IrisShared(cs) {
+class IrisShared(cs: CswServices) extends Script(cs) {
 
-  cs.handleObserveCommand("observe-iris") { command =>
+  cs.handleSetupCommand("setup-iris") { command =>
     spawn {
+      println("************setup iris from shared script***********")
       cs.sendResult(s"Command ${command.commandName} received by ${cs.sequencerId}")
       var firstAssemblyResponse: CommandResponse = null
       var counter                                = 0
@@ -26,10 +27,5 @@ class IrisDarkNight(cs: CswServices) extends IrisShared(cs) {
       println(s"[Iris] Received response: $response")
       response
     }
-  }
-
-  override def onShutdown(): Future[Done] = spawn {
-    println("shutdown iris")
-    Done
   }
 }
