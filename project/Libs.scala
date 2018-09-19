@@ -5,7 +5,7 @@ object Libs {
 //  private val Version = "0.1-SNAPSHOT"
 
   private val Org     = "com.github.tmtsoftware.esw-prototype"
-  private val Version = "54721f6"
+  private val Version = "d882ef4"
 
   val `ocs-framework` = Org             %% "ocs-framework" % Version
   val `scalaTest`           = "org.scalatest" %% "scalatest"           % "3.0.4" % Test
