@@ -4,7 +4,7 @@ import tmt.ocs.ScriptImports._
 
 class IrisDarkNight(cs: CswServices) extends IrisShared(cs) {
 
-  cs.handleObserveCommand("observe-iris") { command =>
+  handleObserveCommand("observe-iris") { command =>
     spawn {
       cs.sendResult(s"Command ${command.commandName} received by ${cs.sequencerId}")
       var firstAssemblyResponse: CommandResponse = null

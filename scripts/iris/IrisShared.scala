@@ -4,7 +4,7 @@ import tmt.ocs.ScriptImports._
 
 class IrisShared(cs: CswServices) extends Script(cs) {
 
-  cs.handleSetupCommand("setup-iris") { command =>
+  handleSetupCommand("setup-iris") { command =>
     spawn {
       println("************setup iris from shared script***********")
       cs.sendResult(s"Command ${command.commandName} received by ${cs.sequencerId}")

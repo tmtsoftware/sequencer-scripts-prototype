@@ -20,9 +20,9 @@ class OcsDarkNight(cs: CswServices) extends Script(cs) {
     Done
   }
 
-  cs.handleCommand("setup-iris") { commandA =>
+  handleCommand("setup-iris") { commandA =>
     spawn {
-      val maybeCommandB = cs.nextIf(c => c.commandName.name == "setup-iris").await
+      val maybeCommandB = nextIf(c => c.commandName.name == "setup-iris").await
       val subCommandsB = if (maybeCommandB.isDefined) {
         val commandB  = maybeCommandB.get
         val commandB1 = Setup(Prefix("test-commandB1"), CommandName("setup-iris"), Some(ObsId("test-obsId")))
@@ -40,9 +40,9 @@ class OcsDarkNight(cs: CswServices) extends Script(cs) {
     }
   }
 
-  cs.handleCommand("setup-iris-tcs") { commandC =>
+  handleCommand("setup-iris-tcs") { commandC =>
     spawn {
-      val maybeCommandD = cs.nextIf(c2 => c2.commandName.name == "setup-iris-tcs").await
+      val maybeCommandD = nextIf(c2 => c2.commandName.name == "setup-iris-tcs").await
       val tcsSequence = if (maybeCommandD.isDefined) {
         val nextCommand = maybeCommandD.get
         CommandList.from(nextCommand)
@@ -65,7 +65,7 @@ class OcsDarkNight(cs: CswServices) extends Script(cs) {
     }
   }
 
-  cs.handleCommand("setup-tcs") { command =>
+  handleCommand("setup-tcs") { command =>
     spawn {
       println(s"[Ocs] Received command: ${command.commandName}")
 

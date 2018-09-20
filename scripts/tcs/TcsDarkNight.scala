@@ -7,7 +7,7 @@ class TcsDarkNight(cs: CswServices) extends Script(cs) {
   var eventCount   = 0
   var commandCount = 0
 
-  cs.handleCommand("setup-tcs") { command =>
+  handleCommand("setup-tcs") { command =>
     spawn {
       println(s"[Tcs] Received command: ${command.commandName}")
 

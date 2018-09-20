@@ -23,7 +23,7 @@ class IrisWithLoop(cs: CswServices) extends Script(cs) {
     }
   }
 
-  cs.handleCommand("setup-start-loop") { command =>
+  handleCommand("setup-start-loop") { command =>
     spawn {
       println(s"[Iris] Received command: ${command.commandName}")
       flag = false
@@ -32,7 +32,7 @@ class IrisWithLoop(cs: CswServices) extends Script(cs) {
     }
   }
 
-  cs.handleCommand("setup-stop-loop") { command =>
+  handleCommand("setup-stop-loop") { command =>
     spawn {
       println(s"[Iris] Received command: ${command.commandName}")
       flag = true
@@ -40,7 +40,7 @@ class IrisWithLoop(cs: CswServices) extends Script(cs) {
     }
   }
 
-  cs.handleCommand("setup-iris") { command =>
+  handleCommand("setup-iris") { command =>
     spawn {
       println(s"[Iris] Received command: ${command.commandName}")
       var firstAssemblyResponse: CommandResponse = null
