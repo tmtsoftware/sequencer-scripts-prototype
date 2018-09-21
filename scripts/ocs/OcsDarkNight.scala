@@ -20,7 +20,7 @@ class OcsDarkNight(cs: CswServices) extends Script(cs) {
     Done
   }
 
-  handleCommand("setup-iris") { commandA =>
+  handleSetupCommand("setup-iris") { commandA =>
     spawn {
       val maybeCommandB = nextIf(c => c.commandName.name == "setup-iris").await
       val subCommandsB = if (maybeCommandB.isDefined) {
@@ -40,7 +40,7 @@ class OcsDarkNight(cs: CswServices) extends Script(cs) {
     }
   }
 
-  handleCommand("setup-iris-tcs") { commandC =>
+  handleSetupCommand("setup-iris-tcs") { commandC =>
     spawn {
       val maybeCommandD = nextIf(c2 => c2.commandName.name == "setup-iris-tcs").await
       val tcsSequence = if (maybeCommandD.isDefined) {
@@ -65,7 +65,7 @@ class OcsDarkNight(cs: CswServices) extends Script(cs) {
     }
   }
 
-  handleCommand("setup-tcs") { command =>
+  handleSetupCommand("setup-tcs") { command =>
     spawn {
       println(s"[Ocs] Received command: ${command.commandName}")
 
