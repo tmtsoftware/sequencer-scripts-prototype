@@ -1,9 +1,9 @@
 package iris
 
-import csw.messages.params.generics.{GChoiceKey, Key, KeyType}
-import csw.messages.params.models.Choices
+import csw.params.core.generics.{GChoiceKey, Key, KeyType}
+import csw.params.core.models.{Choices, Prefix}
+import csw.params.events.EventName
 import helpers.ScriptUtilities._
-import tmt.sequencer.ScriptImports.{EventKey, EventName, Prefix}
 
 object IrisConstants {
 

@@ -1,13 +1,13 @@
 package iris
 
-import csw.messages.commands.CommandIssue
-import csw.messages.params.models.{Choice, Units}
+import csw.params.commands.CommandIssue
+import csw.params.core.models.{Choice, Units}
 import iris.IrisConstants._
-import tmt.sequencer.ScriptImports._
+import tmt.ocs.ScriptImports._
 
 class IrisImagerOnly(csw: CswServices) extends Script(csw) {
 
-  csw.handleSetupCommand("setupObservation") { command =>
+  handleSetupCommand("setupObservation") { command =>
     spawn {
       // extract info from incoming command
       val filter = command(is.command.filterKey).head.toString()
@@ -37,7 +37,7 @@ class IrisImagerOnly(csw: CswServices) extends Script(csw) {
     }
   }
 
-  csw.handleSetupCommand("setObserverKeywords") { command =>
+  handleSetupCommand("setObserverKeywords") { command =>
     spawn {
       // args to command match event.  simply reuse and pass on as event.
       csw.publish(SystemEvent(is.prefix, is.event.observerKeywordsEvent, command.paramSet)).await
@@ -100,7 +100,7 @@ class IrisImagerOnly(csw: CswServices) extends Script(csw) {
   }
 
 
-  csw.handleObserveCommand("observe") { command =>
+  handleObserveCommand("observe") { command =>
     spawn {
       val commandResponse = command(is.command.imagerObserveKey).head.toString() match {
         case "START" =>
@@ -126,7 +126,7 @@ class IrisImagerOnly(csw: CswServices) extends Script(csw) {
   }
 
   // This is an experimental version of observe using a loop started within
-  csw.handleObserveCommand("observe2") { command =>
+  handleObserveCommand("observe2") { command =>
     spawn {
       val commandResponse = command(is.command.imagerObserveKey).head.toString() match {
         case "START" =>
@@ -158,7 +158,7 @@ class IrisImagerOnly(csw: CswServices) extends Script(csw) {
 
 
   // this doesn't exist in IS command interface, but left here as possible alternative
-  csw.handleObserveCommand("singleObserve") { command =>
+  handleObserveCommand("singleObserve") { command =>
     spawn {
       val commandName = command(is.command.imagerObserveKey).head.toString() match {
         case "START" => "START_EXPOSURE"

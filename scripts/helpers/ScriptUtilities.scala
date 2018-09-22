@@ -1,6 +1,5 @@
 package helpers
-
-import csw.messages.params.models.{Choice, Choices}
+import csw.params.core.models.{Choice, Choices}
 
 object ScriptUtilities {
   def makeChoices(str: String*): Choices = {
