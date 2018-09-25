@@ -10,6 +10,7 @@ class TcsDarkNight(cs: CswServices) extends Script(cs) {
   handleSetupCommand("setup-tcs") { command =>
     spawn {
       println(s"[Tcs] Received command: ${command.commandName}")
+      cs.sendResult(s"Command ${command.commandName} received by ${cs.sequencerId}")
 
       val firstAssemblyResponse = cs.setup("Sample1Assembly", command).await
       val commandFailed         = firstAssemblyResponse.isInstanceOf[CommandResponse.Error]
@@ -27,6 +28,7 @@ class TcsDarkNight(cs: CswServices) extends Script(cs) {
         .markSuccessful(command)
 
       println(s"[Tcs] Received response: $response")
+      cs.sendResult(s"[TCS] Received response: $response")
       response
     }
   }
