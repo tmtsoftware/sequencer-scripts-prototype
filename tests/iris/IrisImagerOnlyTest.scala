@@ -1,11 +1,12 @@
 package iris
 import akka.actor.ActorSystem
 import csw.params.commands.{CommandName, Setup}
-import csw.params.core.generics.{KeyType, Parameter}
+import csw.params.core.generics.KeyType
 import csw.params.core.generics.KeyType.IntKey
 import csw.params.core.models.{Choice, Prefix}
 import iris.IrisConstants.is.filterChoices
-import ocs.mocks.{CswServicesMock, SequencerFactory}
+import mocks.CswServicesMockWrapper
+import ocs.mocks.SequencerFactory
 import org.scalatest.FunSuite
 
 import scala.concurrent.Await
@@ -14,7 +15,7 @@ import scala.concurrent.duration.DurationInt
 class IrisImagerOnlyTest extends FunSuite {
   test("test handler for command setupObservation") {
     implicit val system: ActorSystem = ActorSystem("test")
-    val mockCswServices              = CswServicesMock.create(SequencerFactory.create())
+    val mockCswServices              = CswServicesMockWrapper.create(SequencerFactory.create())
     val irisImagerOnly                = new IrisImagerOnly(mockCswServices)
 
 
