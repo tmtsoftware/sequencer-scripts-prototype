@@ -1,4 +1,4 @@
-import tmt.ocs.SequencerApp
+import ocs.framework.SequencerApp
 
 object Main {
   def main(args: Array[String]): Unit = {

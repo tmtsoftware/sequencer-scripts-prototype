@@ -2,7 +2,7 @@ package iris
 import akka.actor.ActorSystem
 import csw.params.commands.{CommandName, Setup}
 import csw.params.core.models.Prefix
-import ocs.mocks.{CswServicesMock, SequencerFactory}
+import ocs.testkit.mocks.{CswServicesMock, SequencerFactory}
 import org.scalatest.FunSuite
 
 import scala.concurrent.Await

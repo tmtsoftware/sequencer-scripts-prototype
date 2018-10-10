@@ -4,7 +4,7 @@ lazy val `sequencer-scripts` = project
   .enablePlugins(JavaAppPackaging)
   .settings(
     inThisBuild(List(
-      organization := "org.tmt",
+      organization := "com.github.tmtsoftware.sequencer-scripts",
       scalaVersion := "2.12.4",
       version      := "0.1.0-SNAPSHOT"
     )),
@@ -15,7 +15,7 @@ lazy val `sequencer-scripts` = project
     resolvers += "jitpack" at "https://jitpack.io",
     libraryDependencies ++= Seq(
       Libs.`ocs-framework`,
-      Libs.`ocs-test-kit`,
+      Libs.`ocs-testkit`,
       Libs.`scalaTest`,
     ),
     publishTo := {

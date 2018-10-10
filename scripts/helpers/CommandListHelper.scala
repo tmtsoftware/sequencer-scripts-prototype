@@ -1,6 +1,7 @@
 package helpers
 
-import tmt.ocs.ScriptImports._
+import csw.params.commands.{CommandList, CommandName, SequenceCommand, Setup}
+import csw.params.core.models.{ObsId, Prefix}
 
 object CommandListHelper {
 

@@ -1,6 +1,6 @@
 package ocs
 
-import tmt.ocs.ScriptImports._
+import ocs.framework.ScriptImports._
 
 class OcsDarkNight(cs: CswServices) extends Script(cs) {
 

@@ -1,6 +1,6 @@
 package iris
 
-import tmt.ocs.ScriptImports._
+import ocs.framework.ScriptImports._
 
 class IrisDarkNight(cs: CswServices) extends IrisShared(cs) {
 
