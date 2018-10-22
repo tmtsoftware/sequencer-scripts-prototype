@@ -4,10 +4,10 @@ import java.util.concurrent.Executors
 import akka.actor.ActorSystem
 import csw.params.commands.{CommandResponse, ControlCommand}
 import iris.IrisConstants.{imagerDetectorAssembly, sciFilterAssembly}
-import ocs.testkit.mocks.CswServicesMock
 import ocs.framework.ScriptImports.toDuration
 import ocs.framework.core.SequenceOperator
 import ocs.framework.dsl.{CswServices, FutureUtils}
+import ocs.testkit.mocks.CswServicesMock
 
 import scala.async.Async._
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -18,9 +18,9 @@ object CswServicesMockWrapper {
     new CswServicesMockWrapper("sequencer1", "mode1", sequencer)
 }
 
-class CswServicesMockWrapper(sequencerId: String, observingMode: String, sequencer: SequenceOperator)(
-    implicit system: ActorSystem
-) extends CswServicesMock(sequencerId, observingMode, sequencer) {
+
+class CswServicesMockWrapper(sequencerId: String, observingMode: String, sequencer: SequenceOperator)(implicit system: ActorSystem)
+    extends CswServicesMock(sequencerId, observingMode, sequencer) {
 
   override def submitAndSubscribe(
       assemblyName: String,

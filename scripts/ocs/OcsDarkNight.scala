@@ -24,6 +24,7 @@ class OcsDarkNight(cs: CswServices) extends Script(cs) {
     spawn {
       cs.sendResult(s"Command ${commandA.commandName} received by ${cs.sequencerId}")
       val maybeCommandB = nextIf(c => c.commandName.name == "setup-iris").await
+      var commandB: SequenceCommand = null
       val subCommandsB = if (maybeCommandB.isDefined) {
         val commandB  = maybeCommandB.get
         val commandB1 = Setup(Prefix("test-commandB1"), CommandName("setup-iris"), Some(ObsId("test-obsId")))
@@ -36,6 +37,7 @@ class OcsDarkNight(cs: CswServices) extends Script(cs) {
 
       iris.await.submit(commandList).await
 
+<<<<<<< HEAD
       val commandAResponse = Completed(commandA.runId)
 
       val response = if (maybeCommandB.isDefined) {
@@ -43,6 +45,9 @@ class OcsDarkNight(cs: CswServices) extends Script(cs) {
       } else {
         AggregateResponse(commandAResponse)
       }
+=======
+      val response = AggregateResponse(Completed(commandA.runId), Completed(commandB.runId))
+>>>>>>> Upgrade esw-prototype sha. Normalise approach for building aggregate response
 
       println(s"[Ocs] Received response: $response")
       cs.sendResult(s"[Ocs] Received response: $response")
@@ -54,9 +59,11 @@ class OcsDarkNight(cs: CswServices) extends Script(cs) {
     spawn {
       cs.sendResult(s"Command ${commandC.commandName} received by ${cs.sequencerId}")
       val maybeCommandD = nextIf(c2 => c2.commandName.name == "setup-iris-tcs").await
+      var commandD: SequenceCommand = null
       val tcsSequence = if (maybeCommandD.isDefined) {
-        val nextCommand = maybeCommandD.get
-        Sequence.from(nextCommand)
+
+        val commandD = maybeCommandD.get
+        Sequence.from(commandD)
       } else {
         Sequence.empty
       }
@@ -69,13 +76,8 @@ class OcsDarkNight(cs: CswServices) extends Script(cs) {
         tcs.await.submit(tcsSequence)
       ).await
 
-      val commandCResponse = Completed(commandC.runId)
 
-      val response = if (maybeCommandD.isDefined) {
-        AggregateResponse(commandCResponse, Completed(maybeCommandD.get.runId))
-      } else {
-        AggregateResponse(commandCResponse)
-      }
+      val response = AggregateResponse(Completed(commandC.runId), Completed(commandD.runId))
 
       println(s"[Ocs] Received response: $response")
       cs.sendResult(s"[Ocs] Received response: $response")
