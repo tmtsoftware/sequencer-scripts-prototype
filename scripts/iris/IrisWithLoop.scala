@@ -18,7 +18,7 @@ class IrisWithLoop(cs: CswServices) extends Script(cs) {
     spawn {
       println("************ loop **************")
       val command = Setup(Prefix("test"), CommandName("test-command"), None)
-      cs.setup("Sample1Assembly", command).await
+      cs.submit("Sample1Assembly", command).await
       stopWhen(flag)
     }
   }
@@ -28,7 +28,7 @@ class IrisWithLoop(cs: CswServices) extends Script(cs) {
       println(s"[Iris] Received command: ${command.commandName}")
       flag = false
       setupAssemblyLoop
-      AggregateResponse(CommandResponse.Completed(command.runId)).markSuccessful(command)
+      AggregateResponse(CommandResponse.Completed(command.runId))
     }
   }
 
@@ -36,7 +36,7 @@ class IrisWithLoop(cs: CswServices) extends Script(cs) {
     spawn {
       println(s"[Iris] Received command: ${command.commandName}")
       flag = true
-      AggregateResponse(CommandResponse.Completed(command.runId)).markSuccessful(command)
+      AggregateResponse(CommandResponse.Completed(command.runId))
     }
   }
 
@@ -48,14 +48,13 @@ class IrisWithLoop(cs: CswServices) extends Script(cs) {
       loop {
         spawn {
           counter += 1
-          firstAssemblyResponse = cs.setup("Sample1Assembly", command).await
+          firstAssemblyResponse = cs.submit("Sample1Assembly", command).await
           println(counter)
           stopWhen(counter > 2)
         }
       }.await
 
-      val response = AggregateResponse(firstAssemblyResponse)
-        .markSuccessful(command)
+      val response = AggregateResponse(Completed(command.runId))
 
       println(s"[Iris] Received response: $response")
       cs.sendResult(s"$response")

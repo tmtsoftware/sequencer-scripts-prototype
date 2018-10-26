@@ -6,7 +6,7 @@ import csw.params.commands.{CommandResponse, ControlCommand}
 import iris.IrisConstants.{imagerDetectorAssembly, sciFilterAssembly}
 import ocs.testkit.mocks.CswServicesMock
 import ocs.framework.ScriptImports.toDuration
-import ocs.framework.Sequencer
+import ocs.framework.core.SequenceOperator
 import ocs.framework.dsl.{CswServices, FutureUtils}
 
 import scala.async.Async._
@@ -14,12 +14,13 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 object CswServicesMockWrapper {
-  def create(sequencer: Sequencer)(implicit system: ActorSystem): CswServices =
+  def create(sequencer: SequenceOperator)(implicit system: ActorSystem): CswServices =
     new CswServicesMockWrapper("sequencer1", "mode1", sequencer)
 }
 
-class CswServicesMockWrapper(sequencerId: String, observingMode: String, sequencer: Sequencer)(implicit system: ActorSystem)
-    extends CswServicesMock(sequencerId, observingMode, sequencer) {
+class CswServicesMockWrapper(sequencerId: String, observingMode: String, sequencer: SequenceOperator)(
+    implicit system: ActorSystem
+) extends CswServicesMock(sequencerId, observingMode, sequencer) {
 
   override def submitAndSubscribe(
       assemblyName: String,

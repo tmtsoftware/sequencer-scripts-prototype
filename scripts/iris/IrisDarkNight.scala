@@ -13,14 +13,13 @@ class IrisDarkNight(cs: CswServices) extends IrisShared(cs) {
         spawn {
           counter += 1
           cs.sendResult(s"Command ${command.commandName} sending to Sample1Assembly")
-          firstAssemblyResponse = cs.setup("Sample1Assembly", command).await
+          firstAssemblyResponse = cs.submit("Sample1Assembly", command).await
           println(counter)
           stopWhen(counter > 2)
         }
       }.await
       println(s"[Iris] Received command: ${command.commandName}")
-      val response = AggregateResponse(firstAssemblyResponse)
-        .markSuccessful(command)
+      val response = AggregateResponse(Completed(command.runId))
 
       cs.sendResult(s"[Iris] Received response: $response")
       println(s"[Iris] Received response: $response")
