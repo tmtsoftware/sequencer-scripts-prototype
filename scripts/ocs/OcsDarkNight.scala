@@ -37,17 +37,7 @@ class OcsDarkNight(cs: CswServices) extends Script(cs) {
 
       iris.await.submit(commandList).await
 
-<<<<<<< HEAD
-      val commandAResponse = Completed(commandA.runId)
-
-      val response = if (maybeCommandB.isDefined) {
-        AggregateResponse(commandAResponse, Completed(maybeCommandB.get.runId))
-      } else {
-        AggregateResponse(commandAResponse)
-      }
-=======
       val response = AggregateResponse(Completed(commandA.runId), Completed(commandB.runId))
->>>>>>> Upgrade esw-prototype sha. Normalise approach for building aggregate response
 
       println(s"[Ocs] Received response: $response")
       cs.sendResult(s"[Ocs] Received response: $response")
