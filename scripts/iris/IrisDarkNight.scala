@@ -2,28 +2,39 @@ package iris
 
 import ocs.framework.ScriptImports._
 
-class IrisDarkNight(cs: CswServices) extends IrisShared(cs) {
+class IrisDarkNight(csw: CswServices) extends IrisShared(csw) {
 
-  handleObserveCommand("observe-iris") { command =>
+  handleSetupCommand("setup-iris") { command =>
     spawn {
-      cs.sendResult(s"Command ${command.commandName} received by ${cs.sequencerId}")
-      var firstAssemblyResponse: CommandResponse = null
-      var counter                                = 0
-      loop {
-        spawn {
-          counter += 1
-          cs.sendResult(s"Command ${command.commandName} sending to Sample1Assembly")
-          firstAssemblyResponse = cs.submit("Sample1Assembly", command).await
-          println(counter)
-          stopWhen(counter > 2)
-        }
-      }.await
       println(s"[Iris] Received command: ${command.commandName}")
-      val response = AggregateResponse(Completed(command.runId))
 
-      cs.sendResult(s"[Iris] Received response: $response")
-      println(s"[Iris] Received response: $response")
-      response
+      val command1 = Setup(Prefix("test-commandA1"), CommandName("commandA1"), Some(ObsId("test-obsId")))
+      val command2 = Setup(Prefix("test-commandA2"), CommandName("commandA2"), Some(ObsId("test-obsId")))
+
+      csw.addSubCommands(parentCommand = command, childCommands = Set(command1, command2))
+
+      val maybeCommandB = nextIf(c => c.commandName.name == "setup-iris").await
+      if (maybeCommandB.isDefined) {
+        val commandB  = maybeCommandB.get
+        val commandB1 = Setup(Prefix("test-commandB1"), CommandName("setup-iris"), Some(ObsId("test-obsId")))
+        val commandB2 = Setup(Prefix("test-commandB2"), CommandName("setup-iris"), Some(ObsId("test-obsId")))
+
+        csw.addSubCommands(parentCommand = commandB, childCommands = Set(commandB1, commandB2))
+
+        val assemblyResponse3 = csw.submit("Sample1Assembly", commandB1).await
+        csw.updateSubCommand(subCmdId = commandB1.runId, subCmdResponse = assemblyResponse3)
+
+        val assemblyResponse4 = csw.submit("Sample1Assembly", commandB2).await
+        csw.updateSubCommand(subCmdId = commandB2.runId, subCmdResponse = assemblyResponse4)
+      }
+
+      val assemblyResponse1 = csw.submit("Sample1Assembly", command1).await
+      csw.updateSubCommand(subCmdId = command1.runId, subCmdResponse = assemblyResponse1)
+
+      val assemblyResponse2 = csw.submit("Sample1Assembly", command2).await
+      csw.updateSubCommand(subCmdId = command2.runId, subCmdResponse = assemblyResponse2)
+
+      Done
     }
   }
 

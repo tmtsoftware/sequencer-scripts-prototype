@@ -2,6 +2,7 @@ package mocks
 import java.util.concurrent.Executors
 
 import akka.actor.ActorSystem
+import csw.params.commands.CommandResponse.SubmitResponse
 import csw.params.commands.{CommandResponse, ControlCommand}
 import iris.IrisConstants.{imagerDetectorAssembly, sciFilterAssembly}
 import ocs.framework.ScriptImports.toDuration
@@ -25,19 +26,19 @@ class CswServicesMockWrapper(sequencerId: String, observingMode: String, sequenc
   override def submitAndSubscribe(
       assemblyName: String,
       command: ControlCommand
-  ): Future[CommandResponse] = {
+  ): Future[SubmitResponse] = {
     assemblyName match {
       case sciFilterAssembly.name =>
         async {
           println(s"submit and subscribe command fired for $assemblyName")
           await(FutureUtils.delay(5.seconds)(Executors.newScheduledThreadPool(2)))
-          await(commandResponseF)
+          await(submitResponseF)
         }
       case imagerDetectorAssembly.name =>
         async {
           println(s"submit and subscribe command fired for $assemblyName")
           await(FutureUtils.delay(1.seconds)(Executors.newScheduledThreadPool(2)))
-          await(commandResponseF)
+          await(submitResponseF)
         }
       case _ => super.submitAndSubscribe(assemblyName, command)
     }
