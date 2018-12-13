@@ -8,8 +8,8 @@ class IrisShared(csw: CswServices) extends Script(csw) {
     spawn {
       println(s"[Iris Shared] Received command: ${command.commandName}")
       println("************setup iris from shared script***********")
-      csw.sendResult(s"Command ${command.commandName} received by ${ csw.sequencerId}")
-      var counter                                = 0
+      csw.sendResult(s"Command ${command.commandName} received by ${csw.sequencerId}")
+      var counter = 0
       loop {
         spawn {
           counter += 1
@@ -21,7 +21,7 @@ class IrisShared(csw: CswServices) extends Script(csw) {
       }.await
 
       val response = Completed(command.runId)
-      csw.addOrUpdateCommand(command.runId, response)
+      csw.addOrUpdateCommand(response)
       csw.sendResult(s"[Iris] Received response: $response")
       println(s"[Iris] Received response: $response")
       Done

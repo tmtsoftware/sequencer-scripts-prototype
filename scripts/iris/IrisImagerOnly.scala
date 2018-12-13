@@ -37,8 +37,8 @@ class IrisImagerOnly(csw: CswServices) extends Script(csw) {
         csw.submitAndSubscribe(imagerDetectorAssembly.name, setupImagerCommand)
       ).await
 
-      csw.updateSubCommand(filterCommand.runId, responses.head)
-      csw.updateSubCommand(setupImagerCommand.runId, responses.last)
+      csw.updateSubCommand(responses.head)
+      csw.updateSubCommand(responses.last)
 
       csw.sendResult(s"[Iris] received response: $responses")
       Done
@@ -49,7 +49,7 @@ class IrisImagerOnly(csw: CswServices) extends Script(csw) {
     spawn {
       // args to command match event.  simply reuse and pass on as event.
       csw.publish(SystemEvent(is.prefix, is.event.observerKeywordsEvent, command.paramSet)).await
-      csw.addOrUpdateCommand(command.runId, CommandResponse.Completed(command.runId))
+      csw.addOrUpdateCommand(CommandResponse.Completed(command.runId))
       Done
     }
   }
@@ -133,7 +133,7 @@ class IrisImagerOnly(csw: CswServices) extends Script(csw) {
           CommandResponse.Invalid(command.runId,
                                   CommandIssue.ParameterValueOutOfRangeIssue("imagerObserve must be START, STOP, or ABORT"))
       }
-      csw.addOrUpdateCommand(command.runId, commandResponse)
+      csw.addOrUpdateCommand(commandResponse)
       Done
     }
   }
@@ -165,7 +165,7 @@ class IrisImagerOnly(csw: CswServices) extends Script(csw) {
           val observeCommand = Observe(is.prefix, CommandName("ABORT_EXPOSURE"), command.maybeObsId)
           csw.submitAndSubscribe(imagerDetectorAssembly.name, observeCommand).await
       }
-      csw.addOrUpdateCommand(command.runId, commandResponse)
+      csw.addOrUpdateCommand(commandResponse)
       Done
     }
   }
@@ -182,7 +182,7 @@ class IrisImagerOnly(csw: CswServices) extends Script(csw) {
       val observeCommand = Observe(is.prefix, CommandName(commandName), command.maybeObsId)
       val response       = csw.submitAndSubscribe(imagerDetectorAssembly.name, observeCommand).await
       csw.addSubCommands(command, Set(observeCommand))
-      csw.updateSubCommand(observeCommand.runId, response)
+      csw.updateSubCommand(response)
       Done
     }
   }
