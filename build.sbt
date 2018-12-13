@@ -5,7 +5,7 @@ lazy val `sequencer-scripts` = project
   .settings(
     inThisBuild(List(
       organization := "com.github.tmtsoftware.sequencer-scripts",
-      scalaVersion := "2.12.4",
+      scalaVersion := "2.12.8",
       version      := "0.1.0-SNAPSHOT"
     )),
 
