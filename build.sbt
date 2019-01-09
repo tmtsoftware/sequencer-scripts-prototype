@@ -4,7 +4,7 @@ lazy val `sequencer-scripts` = project
   .enablePlugins(JavaAppPackaging)
   .settings(
     inThisBuild(List(
-      organization := "com.github.tmtsoftware.sequencer-scripts",
+      organization := "com.github.tmtsoftware",
       scalaVersion := "2.12.8",
       version      := "0.1.0-SNAPSHOT"
     )),
