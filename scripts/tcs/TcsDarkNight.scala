@@ -1,9 +1,8 @@
 package tcs
 
 import ocs.framework.ScriptImports._
-import ocs.framework.dsl
 
-class TcsDarkNight(csw: CswServices) extends dsl.Script(csw) {
+class TcsDarkNight(csw: CswServices) extends Script(csw) {
 
   private var eventCount   = 0
   private var commandCount = 0
@@ -11,6 +10,7 @@ class TcsDarkNight(csw: CswServices) extends dsl.Script(csw) {
   handleSetupCommand("setup-tcs") { command =>
     spawn {
       println(s"[Tcs] Received command: ${command.commandName}")
+      csw.sendResult(s"[Tcs] Received command: ${command.commandName}")
 
       val firstAssemblyResponse = csw.submit("Sample1Assembly", command).await
       val commandFailed         = firstAssemblyResponse.isInstanceOf[CommandResponse.Error]
@@ -26,7 +26,7 @@ class TcsDarkNight(csw: CswServices) extends dsl.Script(csw) {
       csw.addOrUpdateCommand(firstAssemblyResponse)
 
       println(s"[Tcs] Received response: $firstAssemblyResponse")
-      csw.sendResult(s"$firstAssemblyResponse")
+      csw.sendResult(s"[Tcs] Received response: $firstAssemblyResponse")
       Done
     }
   }
