@@ -4,8 +4,7 @@ import ocs.framework.ScriptImports._
 
 class DemoSequencer(csw: CswServices) extends Script(csw) {
 
-  private var eventCount  = 0
-  private var stopLooping = false
+  private var eventCount = 0
 
   private val publisherStream = csw.publish(5.seconds) {
     SystemEvent(Prefix("demo-test"), EventName("system"))
@@ -18,14 +17,15 @@ class DemoSequencer(csw: CswServices) extends Script(csw) {
   }
 
   handleSetupCommand("setup") { command =>
+    var loopCount = 0
     println(s"[Demo] Received command: ${command.commandName}")
 
     spawn {
       loop(500.millis) {
         spawn {
-          println("Handling long running command")
-          if (eventCount >= 10) stopLooping = true
-          stopWhen(stopLooping)
+          loopCount = loopCount + 1
+          println(s"Handling long running command, subscriptionStream got $eventCount events")
+          stopWhen(loopCount > 50)
         }
       }.await
 
