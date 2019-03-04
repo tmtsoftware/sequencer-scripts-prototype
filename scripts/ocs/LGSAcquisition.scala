@@ -12,18 +12,23 @@ class LGSAcquisition (csw: CswServices) extends Script(csw){
 
   private val tcs  = csw.sequencerCommandService("tcs")
   private val aosq  = csw.sequencerCommandService("aoesw")
-  private val irissq  = csw.sequencerCommandService("iris")
+  private val iris  = csw.sequencerCommandService("iris")
 
   // 3.1.1 in Workflows
   handleSetupCommand("preset") { command =>
     spawn {
+      val slewAOSQCommand = Setup(ocs.prefix, CommandName("Slew AOSQ"), command.maybeObsId)
+      val slewTCSCommand = Setup(ocs.prefix, CommandName("Slew TCS"), command.maybeObsId)
+      val slewIRISCommand = Setup(ocs.prefix, CommandName("Slew IRIS"), command.maybeObsId)
+
       val response = par {
-        aosq.await.submit(Sequence(Setup(ocs.prefix, CommandName("Slew AOSQ"), command.maybeObsId)))
-        tcs.await.submit(Sequence(Setup(ocs.prefix, CommandName("Slew TCS"), command.maybeObsId)))
-        irissq.await.submit(Sequence(Setup(ocs.prefix, CommandName("Slew IRIS"), command.maybeObsId)))
+        aosq.await.submit(Sequence(slewAOSQCommand))
+        tcs.await.submit(Sequence(slewTCSCommand))
+        iris.await.submit(Sequence(slewIRISCommand))
       }.await
 
       // validate response?
+
       Done
     }
   }

@@ -1,9 +1,8 @@
 package aoesw
 import csw.params.core.generics.KeyType
 import csw.params.core.models.{Choice, Choices, Prefix}
-import ocs.framework.ScriptImports._
-import helpers.ScriptUtilities._
 import ocs.api.SequencerCommandService
+import ocs.framework.ScriptImports._
 
 class LGSAcquisition(csw: CswServices) extends Script(csw) {
 
