@@ -89,15 +89,13 @@ class OcsIrisImagerAndIfs(csw: CswServices) extends Script(csw) {
       // send filter command
       val imagerConfigResponse = irisImagerSeq.submit(
         Sequence(Setup(ocsPrefix, CommandName("configureImager"), command.maybeObsId)
-          .add(filterKey.set(filter)))
-      )
+          .add(filterKey.set(filter))))
 
       // send IFS setup
       val ifsConfigResponse = irisIfsSeq.submit(
         Sequence(Setup(ocsPrefix, CommandName("configureIfs"), command.maybeObsId)
           .add(scaleKey.set(scales))
-          .add(resolutionKey.set(resolutions)))
-      )
+          .add(resolutionKey.set(resolutions))))
 
       // wait for filter to finish moving
       imagerConfigResponse.await
@@ -108,15 +106,12 @@ class OcsIrisImagerAndIfs(csw: CswServices) extends Script(csw) {
         .add(imagerRampsKey.set(imagerNumRamps))
 
       val imagerObserveSequence = Sequence(repeat(imagerObserveCommand, imagerRepeats):_*)
-
       val imagerObserveResponse = irisImagerSeq.submit(imagerObserveSequence)
 
-
-      // construct IFS sequence
+      // send IFS sequence
       val firstIfsObserveCommand = Observe(ocsPrefix, CommandName("observe"), command.maybeObsId)
         .add(ifsItimeKey.set(ifsItimes.head))
         .add(ifsRampsKey.set(ifsNumRamps.head))
-
       val ifsObserveSequence = Sequence(repeat(firstIfsObserveCommand, ifsRepeats.head):_*)
 
       (1 to ifsConfigurations-1).foreach {configNum =>
@@ -137,10 +132,7 @@ class OcsIrisImagerAndIfs(csw: CswServices) extends Script(csw) {
 
         ifsObserveSequence.add(Sequence(repeat(nextObserveCommand, ifsRepeats(configNum)):_*))
       }
-
-      // send IFS Sequence
       val ifsObserveResponse = irisIfsSeq.submit(ifsObserveSequence).await
-
       imagerObserveResponse.await
 
       csw.addOrUpdateCommand(CommandResponse.Completed(command.runId))
