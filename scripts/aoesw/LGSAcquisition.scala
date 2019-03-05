@@ -6,7 +6,6 @@ import ocs.framework.ScriptImports._
 
 class LGSAcquisition(csw: CswServices) extends Script(csw) {
 
-
   private val tcs  = csw.sequencerCommandService("tcs")
 
   object aosq {
@@ -49,23 +48,33 @@ class LGSAcquisition(csw: CswServices) extends Script(csw) {
   val tcsOffsetVirtualTelescopeChoices = Choices.from("MOUNT", "OIWFS1", "OIWFS2", "OIWFS3", "OIWFS4", "ODGW1", "ODGW2", "ODGW3", "ODGW4", "GUIDER1", "GUIDER2")
   val tcsOffsetVTKey = KeyType.ChoiceKey.make("virtualTelescope", tcsOffsetVirtualTelescopeChoices)
 
+
+  val loopEventKey = EventKey(rtcAssembly.prefix, EventName("loop"))
+  val oiwfsLoopStatesChoices = Choices.from("IDLE", "LOST", "ACTIVE")
+  val oiwfsLoopKey = KeyType.ChoiceKey.make("oiwfsPoa", oiwfsLoopStatesChoices)
+
+  csw.subscribe(Set(loopEventKey)) {
+    case ev: SystemEvent =>
+      val oiwfsLoopStates = ev(oiwfsLoopKey)
+      for (ii <- oiwfsLoopStates.items.indices) {
+        if (oiwfsLoopStates.items(ii) == Choice("LOST")) {
+          handleOiwfsLoopOpen(ii)
+        }
+      }
+    Done
+    case _ => Done
+  }
+
+  def handleOiwfsLoopOpen(oiwfsProbeNum: Int): Unit = {
+    // Do something
+  }
+
   val TCSOFFSETTHRESHOLD = 2.0 // arcsec ???
-
-
-
-  def dist(x: Float, y: Float): Double = {
-    Math.sqrt(x*x+y*y)
-  }
-
-  def isOffsetRequired(x: Float, y: Float): Boolean = {
-    dist(x,y) > TCSOFFSETTHRESHOLD
-  }
-
+  def isOffsetRequired(x: Float, y: Float): Boolean = Math.sqrt(x*x+y*y) > TCSOFFSETTHRESHOLD
 
 
   handleSetupCommand("enableOiwfsTtf") { command =>
     spawn {
-
       val ttfProbeNum = csw.get(oiwfsStateEvent).await match {
         case ev: SystemEvent => ev(oiwfsStateEnableKey).items.indexOf(Choice("TTF"))
         case _ => -1
@@ -73,11 +82,9 @@ class LGSAcquisition(csw: CswServices) extends Script(csw) {
 
       var ttfFluxHigh = false
       var ttfFluxLow = false
-
       var xoffset = 0.0f
       var yoffset = 0.0f
-
-      csw.subscribe(Set(oiwfsStateEvent, ttfOffsetEvent)) {
+      val subscription = csw.subscribe(Set(oiwfsStateEvent, ttfOffsetEvent)) {
         case ev: SystemEvent =>
           ev.eventName match {
             case oiwfsStateEvent.eventName =>
@@ -94,54 +101,57 @@ class LGSAcquisition(csw: CswServices) extends Script(csw) {
         case _ => Done
       }
 
-      // todo check mode = on
-
-      // start exposures
+      // start continuous exposures on TTF probe
+      val probeExpModes = (0 to 2).map(i => if (i == ttfProbeNum) Choice("CONTINUOUS") else Choice("NOOP"))
       val startExposureCommand = Setup(aosq.prefix, CommandName("exposure"), command.maybeObsId)
-        .add(oiwfsExposureModeKey.set(Choice("CONTINUOUS"), Choice("NOOP"), Choice("NOOP")))
+        .add(oiwfsExposureModeKey.set(probeExpModes:_*))
 
       val response = csw.submitAndSubscribe(oiwfsDetectorAssembly.name, startExposureCommand).await
 
-      // todo check response
-      // todo crm?
-
-      var guideStarLocked: Boolean = false
-
+      val guideStarLockedThreshold = 5  // number of consecutive loops without an offset to consider stable
+      var timesGuideStarLocked: Int = 0
+      val maxAttempts = 20  // maximum number of loops on this guide star before rejecting
+      var attempts = 0
       loop (500.millis) {  // period tbd
         spawn {
           if (ttfFluxLow) {
-            // increase exposure time (how?)
-
+            // increase exposure time
+            increaseExposureTime()
           } else {
             // gs found (centroid success)
-
             if (isOffsetRequired(xoffset, yoffset)) {
-              // offset telescope.  wait for completion (how does this method complete?  this is a seq command)
+              // offset telescope.  wait for completion
               val offsetResponse = offsetTcs(tcs.await, xoffset, yoffset, ttfProbeNum, command.maybeObsId).await
-
-              // check response
-
+              timesGuideStarLocked = 0
             } else {
-              guideStarLocked = true
+              timesGuideStarLocked += 1
             }
           }
-          stopWhen(guideStarLocked)
+          attempts += 1
+          stopWhen((timesGuideStarLocked == guideStarLockedThreshold) || (attempts == maxAttempts))
         }
       }.await
 
-
-
+      subscription.unsubscribe()
+      if (timesGuideStarLocked == guideStarLockedThreshold) {
+        csw.addOrUpdateCommand(CommandResponse.Completed(command.runId))
+      } else {
+        csw.addOrUpdateCommand(CommandResponse.Error(command.runId, "Guide Star Unstable"))
+      }
       Done
     }
   }
 
+  def increaseExposureTime(): Unit = {
+    // not sure how this is done
+  }
 
-  def offsetTcs(tcs: SequencerCommandService, xoffset: Float, yoffset: Float, probeNum: Int, maybeObsId: Option[ObsId]) = {
+  def offsetTcs(tcs: SequencerCommandService, xoffset: Float, yoffset: Float, probeNum: Int, maybeObsId: Option[ObsId]): Future[CommandResponse.SubmitResponse] = {
     tcs.submit(Sequence(Setup(aosq.prefix, CommandName("offset"), maybeObsId)
       .add(tcsOffsetCoordSystemKey.set(Choice("RADEC")))
       .add(tcsOffsetXKey.set(xoffset))
       .add(tcsOffsetYKey.set(yoffset))
-      .add(tcsOffsetVTKey.set(Choice(s"OIWFS$probeNum")))
+      .add(tcsOffsetVTKey.set(Choice(s"OIWFS${probeNum+1}")))
     ))
   }
 }
