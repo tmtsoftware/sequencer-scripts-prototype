@@ -25,7 +25,7 @@ class TcsSync(csw: CswServices) extends Script(csw) {
       val offsetX = command(tcsOffsetXKey)
       val offsetY = command(tcsOffsetYKey)
 
-      val tcsCommand = Setup(tcs.prefix, CommandName("offset"), command.maybeObsId)
+      val tcsCommand = Setup(tcs.prefix, CommandName("scheduledOffset"), command.maybeObsId)
         .add(tpkOffsetXKey.set(offsetX.head))
         .add(tpkOffsetYKey.set(offsetY.head))
 

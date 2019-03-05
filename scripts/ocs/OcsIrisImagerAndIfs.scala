@@ -132,7 +132,11 @@ class OcsIrisImagerAndIfs(csw: CswServices) extends Script(csw) {
 
         ifsObserveSequence.add(Sequence(repeat(nextObserveCommand, ifsRepeats(configNum)):_*))
       }
+      // make sure IFS has finished configuring
+      ifsConfigResponse.await
+      // send sequence
       val ifsObserveResponse = irisIfsSeq.submit(ifsObserveSequence).await
+      // wait for imager to complete
       imagerObserveResponse.await
 
       csw.addOrUpdateCommand(CommandResponse.Completed(command.runId))

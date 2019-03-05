@@ -25,7 +25,7 @@ class AoeswSync(csw: CswServices) extends Script(csw) {
       val offsetX = command(aoeswOffsetXKey)
       val offsetY = command(aoeswOffsetYKey)
 
-      val probeCommand = Setup(aosq.prefix, CommandName("offset"), command.maybeObsId)
+      val probeCommand = Setup(aosq.prefix, CommandName("scheduledOffset"), command.maybeObsId)
         .add(probeOffsetXKey.set(offsetX.head))
         .add(probeOffsetYKey.set(offsetY.head))
 
