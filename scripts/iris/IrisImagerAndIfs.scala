@@ -7,7 +7,6 @@ import ocs.framework.ScriptImports._
 import scala.concurrent.{ExecutionContext, Future}
 
 class IrisImagerAndIfs(csw: CswServices) extends Script(csw) {
-  implicit val executionContext: ExecutionContext = strandEc.ec
 
   val isPrefix = Prefix("iris.is")
 
@@ -69,7 +68,7 @@ class IrisImagerAndIfs(csw: CswServices) extends Script(csw) {
       val ifsRamps   = command(ifsRampsKey)
       val ifsRepeats = command(ifsRepeatsKey)
 
-      filterResponse.foreach { response =>
+      val response = filterResponse.await
         // start Imager Exposure loop
         // Imager loop
         var imagerExposureCounter = 0
@@ -152,8 +151,6 @@ class IrisImagerAndIfs(csw: CswServices) extends Script(csw) {
             stopWhen(ifsConfigurationCounter == numIfsConfigs)
           }
         }
-
-      }
 
       // if results are successful, updated CRM
       csw.addOrUpdateCommand(CommandResponse.Completed(command.runId))

@@ -11,8 +11,8 @@ class OcsSync(csw: CswServices) extends Script(csw) {
     val name = "esw-ocs-sequencer"
   }
 
-  private val aosq = csw.sequencerCommandService("aoesw").await
-  private val tcs  = csw.sequencerCommandService("tcs").await
+  private val aosq = csw.sequencerCommandService("aoesw")
+  private val tcs  = csw.sequencerCommandService("tcs")
 
   private val offsetTime = KeyType.TAITimeKey.make(name = "scheduledTime")
   private val offsetXKey = KeyType.FloatKey.make("x")
@@ -50,8 +50,8 @@ class OcsSync(csw: CswServices) extends Script(csw) {
         .add(tcsOffsetTime.set(scheduledTime.head))
 
       var responses = par {
-        tcs.submit(Sequence(tcsCommand))
-        aosq.submit(Sequence(aoCommand))
+        tcs.await.submit(Sequence(tcsCommand))
+        aosq.await.submit(Sequence(aoCommand))
       }.await
 
       csw.updateSubCommand(responses.head)
