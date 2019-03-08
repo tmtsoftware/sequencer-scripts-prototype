@@ -8,7 +8,7 @@ class TcsSync(csw: CswServices) extends Script(csw) {
 
   object tcs {
     val prefix = Prefix("tcs.sequencer")
-    val name = "tcs-sequencer"
+    val name   = "tcs-sequencer"
   }
 
   private val tcsOffsetTime = KeyType.TAITimeKey.make(name = "scheduledTime")
@@ -18,16 +18,17 @@ class TcsSync(csw: CswServices) extends Script(csw) {
   private val tpkOffsetXKey = KeyType.FloatKey.make("x")
   private val tpkOffsetYKey = KeyType.FloatKey.make("y")
 
-
   handleSetupCommand("offset") { command =>
     spawn {
       val scheduledTime = command(tcsOffsetTime)
-      val offsetX = command(tcsOffsetXKey)
-      val offsetY = command(tcsOffsetYKey)
+      val offsetX       = command(tcsOffsetXKey)
+      val offsetY       = command(tcsOffsetYKey)
 
       val tcsCommand = Setup(tcs.prefix, CommandName("offset"), command.maybeObsId)
         .add(tpkOffsetXKey.set(offsetX.head))
         .add(tpkOffsetYKey.set(offsetY.head))
+
+      csw.addSubCommands(command, Set(tcsCommand))
 
       csw.scheduler.scheduleOnce(scheduledTime.head) {
         spawn {
@@ -40,7 +41,7 @@ class TcsSync(csw: CswServices) extends Script(csw) {
     }
   }
 
-      override def onShutdown(): Future[Done] = spawn {
+  override def onShutdown(): Future[Done] = spawn {
     println("shutdown ocs")
     Done
   }
