@@ -28,6 +28,18 @@ class TcsSync(csw: CswServices) extends Script(csw) {
         .add(tpkOffsetXKey.set(offsetX.head))
         .add(tpkOffsetYKey.set(offsetY.head))
 
+      /*
+       * as the response would have command ID of tcsCommand(line 27)
+       * which is a different command then the original command received.
+       * you can add tcsCommand as subcommand to original command and then
+       * give the response directly to CRM, since it will first mark the subcommand complete and
+       * parent command would be inferred automatically
+       *
+       * csw.addSubCommands(command, Set(tcsCommand))
+       * csw.updateSubCommand(commandResponse)
+      */
+
+
       csw.addSubCommands(command, Set(tcsCommand))
 
       csw.scheduler.scheduleOnce(scheduledTime.head) {

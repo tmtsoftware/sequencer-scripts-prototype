@@ -56,8 +56,8 @@ class OcsSync(csw: CswServices) extends Script(csw) {
         aosq.await.submit(Sequence(aoCommand))
       }.await
 
-      csw.updateSubCommand(responses.head)
-      csw.updateSubCommand(responses.last)
+      csw.updateSubCommand(CommandResponse.withRunId(tcsCommand.runId,responses.head))
+      csw.updateSubCommand(CommandResponse.withRunId(aoCommand.runId,responses.last))
 
       Done
     }
