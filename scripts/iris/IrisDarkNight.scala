@@ -2,7 +2,7 @@ package iris
 
 import ocs.framework.ScriptImports._
 
-class IrisDarkNight(csw: CswServices) extends Script(csw) {
+class IrisDarkNight(csw: CswServices) extends IrisShared(csw) {
 
   var flag = true
 
