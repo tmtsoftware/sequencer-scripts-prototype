@@ -27,10 +27,12 @@ class AoeswSync(csw: CswServices) extends Script(csw) {
         .add(probeOffsetXKey.set(offsetX.head))
         .add(probeOffsetYKey.set(offsetY.head))
 
+      csw.addSubCommands(command, Set(probeCommand))
+
       csw.scheduler.scheduleOnce(scheduledTime.head) {
         spawn {
           val response = csw.submit("probeAssembly", probeCommand).await
-          csw.updateSubCommand(CommandResponse.withRunId(command.runId, response))
+          csw.updateSubCommand(response)
         }
       }
 

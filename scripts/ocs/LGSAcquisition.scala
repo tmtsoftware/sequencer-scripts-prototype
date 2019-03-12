@@ -28,7 +28,7 @@ class LGSAcquisition (csw: CswServices) extends Script(csw){
       }.await
 
       // validate response?
-
+      csw.addSequenceResponse(Set(command), Completed(command.runId))
       Done
     }
   }

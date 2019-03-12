@@ -96,8 +96,11 @@ class LGSAcquisition(csw: CswServices) extends Script(csw) {
       val startExposureCommand = Setup(aosq.prefix, CommandName("exposure"), command.maybeObsId)
         .add(oiwfsExposureModeKey.set(Choice("CONTINUOUS"), Choice("NOOP"), Choice("NOOP")))
 
+      csw.addSubCommands(command, Set(startExposureCommand))
+
       val response = csw.submitAndSubscribe(oiwfsDetectorAssembly.name, startExposureCommand).await
 
+      csw.updateSubCommand(response)
       // todo check response
       // todo crm?
 

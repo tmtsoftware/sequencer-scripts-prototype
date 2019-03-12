@@ -25,6 +25,7 @@ class WfosObserve(csw: CswServices) extends Script(csw) {
           stopWhen((counter == repeats.head) || stopObserving)
         }
       }
+      csw.addOrUpdateCommand(Completed(command.runId))
       Done
     }
   }

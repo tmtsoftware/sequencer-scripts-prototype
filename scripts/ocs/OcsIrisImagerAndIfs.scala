@@ -60,17 +60,12 @@ class OcsIrisImagerAndIfs(csw: CswServices) extends Script(csw) {
         .await
 
       /**
-       * directly adding or updating response would be a wrong approach,
-       * as the response would have command ID of Sequence(line 116)
-       * which is different then the original commandId received.
        *
-       * right approach could be -
-       * csw.addOrUpdateCommand(CommandResponse.withRunId(command.runId,response))
-       *
-       * or since you are passing a sequence downstream you can also do
+       * since sequence is being passed to downstream, crm can be updated using
        * csw.addSequenceResponse(Set(command),response)
        */
-      csw.addOrUpdateCommand(CommandResponse.withRunId(command.runId, response))
+
+      csw.addSequenceResponse(Set(command), response)
       Done
     }
   }
@@ -152,7 +147,15 @@ class OcsIrisImagerAndIfs(csw: CswServices) extends Script(csw) {
       val ifsObserveResponse = irisIfsSeq.submit(ifsObserveSequence).await
       imagerObserveResponse.await
 
-      csw.addOrUpdateCommand(CommandResponse.Completed(command.runId))
+      /*
+      Response for commandA can be updated in CRM with two approaches.
+      Approach 1 - Add subcommands (csw.addSubCommand) for commandA and then update subcommand responses using
+      csw.updateSubCommand. CRM will infer response and completion of commandA
+
+      Approach 2 - If script writer does not want to track subcommands then scriptwriter
+      can directly update response of commandA using csw.addSequenceResponse
+       */
+      csw.addSequenceResponse(Set(command), Completed(command.runId))
       Done
     }
   }
