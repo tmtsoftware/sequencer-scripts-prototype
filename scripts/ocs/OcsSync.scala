@@ -1,5 +1,6 @@
 package ocs
 
+import csw.params.commands.CommandResponse.CompletedWithResult
 import csw.params.core.generics.KeyType
 import csw.params.core.models.Prefix
 import ocs.framework.ScriptImports._
@@ -49,16 +50,12 @@ class OcsSync(csw: CswServices) extends Script(csw) {
         .add(tcsOffsetYKey.set(offsetY.head))
         .add(tcsOffsetTime.set(scheduledTime.head))
 
-      csw.addSubCommands(command, Set(aoCommand, tcsCommand))
-
-      var responses = par {
+      par {
         tcs.await.submit(Sequence(tcsCommand))
         aosq.await.submit(Sequence(aoCommand))
       }.await
 
-      csw.updateSubCommand(CommandResponse.withRunId(tcsCommand.runId,responses.head))
-      csw.updateSubCommand(CommandResponse.withRunId(aoCommand.runId,responses.last))
-
+      csw.addSequenceResponse(Set(command), Completed(command.runId))
       Done
     }
   }
