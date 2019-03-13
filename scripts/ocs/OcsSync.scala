@@ -8,7 +8,7 @@ class OcsSync(csw: CswServices) extends Script(csw) {
 
   object ocs {
     val prefix = Prefix("esw.ocs")
-    val name = "esw-ocs-sequencer"
+    val name   = "esw-ocs-sequencer"
   }
 
   private val aosq = csw.sequencerCommandService("aoesw")
@@ -26,7 +26,7 @@ class OcsSync(csw: CswServices) extends Script(csw) {
   private val tcsOffsetXKey = KeyType.FloatKey.make("x")
   private val tcsOffsetYKey = KeyType.FloatKey.make("y")
 
-  private def transformOffsetToAo(x: Float, y: Float) =  {
+  private def transformOffsetToAo(x: Float, y: Float) = {
     // some transformation
     (x, y)
   }
@@ -34,34 +34,36 @@ class OcsSync(csw: CswServices) extends Script(csw) {
   handleSetupCommand("offset") { command =>
     spawn {
       val scheduledTime = command(offsetTime)
-      val offsetX = command(offsetXKey)
-      val offsetY = command(offsetYKey)
+      val offsetX       = command(offsetXKey)
+      val offsetY       = command(offsetYKey)
 
       val aoOffset = transformOffsetToAo(offsetX.head, offsetY.head)
 
       val aoCommand = Setup(ocs.prefix, CommandName("scheduledOffset"), command.maybeObsId)
-          .add(aoOffsetXKey.set(aoOffset._1))
-          .add(aoOffsetYKey.set(aoOffset._2))
-          .add(aoOffsetTime.set(scheduledTime.head))
+        .add(aoOffsetXKey.set(aoOffset._1))
+        .add(aoOffsetYKey.set(aoOffset._2))
+        .add(aoOffsetTime.set(scheduledTime.head))
 
       val tcsCommand = Setup(ocs.prefix, CommandName("scheduledOffset"), command.maybeObsId)
         .add(tcsOffsetXKey.set(offsetX.head))
         .add(tcsOffsetYKey.set(offsetY.head))
         .add(tcsOffsetTime.set(scheduledTime.head))
 
+      csw.addSubCommands(command, Set(aoCommand, tcsCommand))
+
       var responses = par {
         tcs.await.submit(Sequence(tcsCommand))
         aosq.await.submit(Sequence(aoCommand))
       }.await
 
-      csw.updateSubCommand(responses.head)
-      csw.updateSubCommand(responses.last)
+      csw.updateSubCommand(CommandResponse.withRunId(tcsCommand.runId,responses.head))
+      csw.updateSubCommand(CommandResponse.withRunId(aoCommand.runId,responses.last))
 
       Done
     }
   }
 
-      override def onShutdown(): Future[Done] = spawn {
+  override def onShutdown(): Future[Done] = spawn {
     println("shutdown ocs")
     Done
   }

@@ -1,14 +1,13 @@
 package aoesw
 
 import csw.params.core.generics.KeyType
-import csw.params.core.models.Prefix
 import ocs.framework.ScriptImports._
 
 class AoeswSync(csw: CswServices) extends Script(csw) {
 
   object aosq {
     val prefix = Prefix("aoesw.aosq")
-    val name = "aoesw-sequencer"
+    val name   = "aoesw-sequencer"
   }
 
   private val aoeswOffsetTime = KeyType.TAITimeKey.make(name = "scheduledTime")
@@ -18,12 +17,11 @@ class AoeswSync(csw: CswServices) extends Script(csw) {
   private val probeOffsetXKey = KeyType.FloatKey.make("x")
   private val probeOffsetYKey = KeyType.FloatKey.make("y")
 
-
   handleSetupCommand("offset") { command =>
     spawn {
       val scheduledTime = command(aoeswOffsetTime)
-      val offsetX = command(aoeswOffsetXKey)
-      val offsetY = command(aoeswOffsetYKey)
+      val offsetX       = command(aoeswOffsetXKey)
+      val offsetY       = command(aoeswOffsetYKey)
 
       val probeCommand = Setup(aosq.prefix, CommandName("scheduledOffset"), command.maybeObsId)
         .add(probeOffsetXKey.set(offsetX.head))
@@ -31,8 +29,8 @@ class AoeswSync(csw: CswServices) extends Script(csw) {
 
       csw.scheduler.scheduleOnce(scheduledTime.head) {
         spawn {
-          val commandResponse = csw.submit("probeAssembly", probeCommand).await
-          csw.updateSubCommand(commandResponse)
+          val response = csw.submit("probeAssembly", probeCommand).await
+          csw.updateSubCommand(CommandResponse.withRunId(command.runId, response))
         }
       }
 
@@ -40,7 +38,7 @@ class AoeswSync(csw: CswServices) extends Script(csw) {
     }
   }
 
-      override def onShutdown(): Future[Done] = spawn {
+  override def onShutdown(): Future[Done] = spawn {
     println("shutdown ocs")
     Done
   }

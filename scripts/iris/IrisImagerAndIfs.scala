@@ -22,18 +22,18 @@ class IrisImagerAndIfs(csw: CswServices) extends Script(csw) {
     "10000-Y", "10000-J", "10000-H", "10000-K", "Mirror")
 
 
-  val filterKey: GChoiceKey = KeyType.ChoiceKey.make("filter", filterChoices)
-  val scaleKey: GChoiceKey = KeyType.ChoiceKey.make("scale", scaleChoices)
-  val resolutionKey: GChoiceKey = KeyType.ChoiceKey.make("spectralResolution", spectralResolutionChoices)
-  val imagerItimeKey: Key[Int] = KeyType.IntKey.make("imagerIntegrationTime")
-  val imagerRampsKey: Key[Int] = KeyType.IntKey.make("imagerNumRamps")
-  val imagerRepeatsKey: Key[Int] = KeyType.IntKey.make("imagerNumRepeats")
-  val ifsItimeKey: Key[Int] = KeyType.IntKey.make("ifsIntegrationTime")
-  val ifsRampsKey: Key[Int] = KeyType.IntKey.make("ifsNumRamps")
-  val ifsRepeatsKey: Key[Int] = KeyType.IntKey.make("ifsNumRepeats")
+  val filterKey: GChoiceKey          = KeyType.ChoiceKey.make("filter", filterChoices)
+  val scaleKey: GChoiceKey           = KeyType.ChoiceKey.make("scale", scaleChoices)
+  val resolutionKey: GChoiceKey      = KeyType.ChoiceKey.make("spectralResolution", spectralResolutionChoices)
+  val imagerItimeKey: Key[Int]       = KeyType.IntKey.make("imagerIntegrationTime")
+  val imagerRampsKey: Key[Int]       = KeyType.IntKey.make("imagerNumRamps")
+  val imagerRepeatsKey: Key[Int]     = KeyType.IntKey.make("imagerNumRepeats")
+  val ifsItimeKey: Key[Int]          = KeyType.IntKey.make("ifsIntegrationTime")
+  val ifsRampsKey: Key[Int]          = KeyType.IntKey.make("ifsNumRamps")
+  val ifsRepeatsKey: Key[Int]        = KeyType.IntKey.make("ifsNumRepeats")
   val ifsConfigurationsKey: Key[Int] = KeyType.IntKey.make("ifsConfigurations")
 
-  val singleScaleKey: GChoiceKey = KeyType.ChoiceKey.make("scale", scaleChoices)
+  val singleScaleKey: GChoiceKey      = KeyType.ChoiceKey.make("scale", scaleChoices)
   val singleResolutionKey: GChoiceKey = KeyType.ChoiceKey.make("spectralResolution", spectralResolutionChoices)
 
   handleSetupCommand("parallelObservation") { command =>
@@ -45,18 +45,17 @@ class IrisImagerAndIfs(csw: CswServices) extends Script(csw) {
       // configure IFS
       val scales      = command(scaleKey)
       val resolutions = command(resolutionKey)
-
-      val firstScaleResponse =
+      val scaleAndResolutionResponse = par {
         csw.submit("scaleAssembly",
                    Setup(isPrefix, CommandName("setScale"), command.maybeObsId)
-                     .add(singleScaleKey.set(scales.head))
-        )
-      val firstResolutionResponse =
+                     .add(singleScaleKey.set(scales.head)))
+
         csw.submit(
           "resolutionAssembly",
           Setup(isPrefix, CommandName("setResolution"), command.maybeObsId)
             .add(singleResolutionKey.set(resolutions.head))
         )
+      }
 
       // exposure parameters
       val imagerItime   = command(imagerItimeKey).head
@@ -64,93 +63,93 @@ class IrisImagerAndIfs(csw: CswServices) extends Script(csw) {
       val imagerRepeats = command(imagerRepeatsKey).head
 
       val numIfsConfigs = command(ifsConfigurationsKey).head
-      val ifsItimes  = command(ifsItimeKey)
-      val ifsRamps   = command(ifsRampsKey)
-      val ifsRepeats = command(ifsRepeatsKey)
+      val ifsItimes     = command(ifsItimeKey)
+      val ifsRamps      = command(ifsRampsKey)
+      val ifsRepeats    = command(ifsRepeatsKey)
 
       val response = filterResponse.await
-        // start Imager Exposure loop
-        // Imager loop
-        var imagerExposureCounter = 0
-        val imagerExposureLoop = loop {
-          spawn {
-            // configure exposure
-            val imagerItimeKey = KeyType.IntKey.make("integrationTime")
-            val imagerRampsKey = KeyType.IntKey.make("ramps")
-            csw
-              .submit(
-                "imagerDetectorAssembly",
-                Setup(isPrefix, CommandName("configureExposure"), command.maybeObsId)
-                  .add(imagerItimeKey.set(ifsItimes.get(imagerExposureCounter).get))
-                  .add(imagerRampsKey.set(ifsRamps.get(imagerExposureCounter).get))
-              )
-              .await
-            // observe (assumes completes when exposure is complete)
-            csw
-              .submit("imagerDetectorAssembly",
-              Observe(isPrefix, CommandName("observe"), command.maybeObsId)
-              )
-              .await
+      // start Imager Exposure loop
+      // Imager loop
+      var imagerExposureCounter = 0
+      val imagerExposureLoop = loop {
+        spawn {
+          // configure exposure
+          val imagerItimeKey = KeyType.IntKey.make("integrationTime")
+          val imagerRampsKey = KeyType.IntKey.make("ramps")
+          csw
+            .submit(
+              "imagerDetectorAssembly",
+              Setup(isPrefix, CommandName("configureExposure"), command.maybeObsId)
+                .add(imagerItimeKey.set(ifsItimes.get(imagerExposureCounter).get))
+                .add(imagerRampsKey.set(ifsRamps.get(imagerExposureCounter).get))
+            )
+            .await
+          // observe (assumes completes when exposure is complete)
+          csw
+            .submit("imagerDetectorAssembly", Observe(isPrefix, CommandName("observe"), command.maybeObsId))
+            .await
 
-            imagerExposureCounter += 1
+          imagerExposureCounter += 1
 
-            stopWhen(imagerExposureCounter == imagerRepeats)
-          }
+          stopWhen(imagerExposureCounter == imagerRepeats)
         }
+      }
 
-        firstScaleResponse.await
-        firstResolutionResponse.await
+      scaleAndResolutionResponse.await
 
-        // start IFS Exposure Loop
-        var ifsConfigurationCounter = 0
-        val ifsExposureLoop = loop {
-          spawn {
-            if (ifsConfigurationCounter > 1) {
-              // configure IFS settings
-              val ifsScaleKey      = KeyType.ChoiceKey.make("scale", scaleChoices)
-              val ifsResolutionKey = KeyType.ChoiceKey.make("spectralResolution", spectralResolutionChoices)
+      // start IFS Exposure Loop
+      var ifsConfigurationCounter = 0
+      val ifsExposureLoop = loop {
+        spawn {
+          if (ifsConfigurationCounter > 1) {
+            // configure IFS settings
+            val ifsScaleKey      = KeyType.ChoiceKey.make("scale", scaleChoices)
+            val ifsResolutionKey = KeyType.ChoiceKey.make("spectralResolution", spectralResolutionChoices)
 
-              val scaleFuture = csw.submit("scaleAssembly",
-                                           Setup(isPrefix, CommandName("setScale"), command.maybeObsId)
-                                             .add(ifsScaleKey.set(scales.get(ifsConfigurationCounter).get)))
+            par {
+              csw.submit(
+                "scaleAssembly",
+                Setup(isPrefix, CommandName("setScale"), command.maybeObsId)
+                  .add(ifsScaleKey.set(scales.get(ifsConfigurationCounter).get))
+              )
+
+              csw.submit(
+                "resolutionAssembly",
+                Setup(isPrefix, CommandName("setResolution"), command.maybeObsId)
+                  .add(ifsResolutionKey.set(resolutions.get(ifsConfigurationCounter).get))
+              )
+            }.await
+          }
+
+          var ifsExposureCounter = 0
+          loop {
+            spawn {
+              // configure exposure
+              val ifsItimeKey = KeyType.IntKey.make("integrationTime")
+              val ifsRampsKey = KeyType.IntKey.make("ramps")
               csw
                 .submit(
-                  "resolutionAssembly",
-                  Setup(isPrefix, CommandName("setResolution"), command.maybeObsId)
-                    .add(ifsResolutionKey.set(resolutions.get(ifsConfigurationCounter).get))
+                  "ifsDetectorAssembly",
+                  Setup(isPrefix, CommandName("configureExposure"), command.maybeObsId)
+                    .add(ifsItimeKey.set(ifsItimes.get(ifsExposureCounter).get))
+                    .add(ifsRampsKey.set(ifsRamps.get(ifsExposureCounter).get))
                 )
                 .await
-              scaleFuture.await
+              // observe (assumes completes when exposure is complete)
+              csw.submit("ifsDetetorAssembly", Observe(isPrefix, CommandName("observe"), command.maybeObsId)).await
+
+              ifsExposureCounter += 1
+
+              stopWhen(ifsExposureCounter == ifsRepeats.get(ifsExposureCounter).get)
             }
-            var ifsExposureCounter = 0
-            loop {
-              spawn {
-                // configure exposure
-                val ifsItimeKey = KeyType.IntKey.make("integrationTime")
-                val ifsRampsKey = KeyType.IntKey.make("ramps")
-                csw
-                  .submit(
-                    "ifsDetectorAssembly",
-                    Setup(isPrefix, CommandName("configureExposure"), command.maybeObsId)
-                      .add(ifsItimeKey.set(ifsItimes.get(ifsExposureCounter).get))
-                      .add(ifsRampsKey.set(ifsRamps.get(ifsExposureCounter).get))
-                  )
-                  .await
-                // observe (assumes completes when exposure is complete)
-                csw.submit("ifsDetetorAssembly", Observe(isPrefix, CommandName("observe"), command.maybeObsId)).await
 
-                ifsExposureCounter += 1
+          }.await
 
-                stopWhen(ifsExposureCounter == ifsRepeats.get(ifsExposureCounter).get)
-              }
+          ifsConfigurationCounter += 1
 
-            }.await
-
-            ifsConfigurationCounter += 1
-
-            stopWhen(ifsConfigurationCounter == numIfsConfigs)
-          }
+          stopWhen(ifsConfigurationCounter == numIfsConfigs)
         }
+      }
 
       // if results are successful, updated CRM
       csw.addOrUpdateCommand(CommandResponse.Completed(command.runId))
