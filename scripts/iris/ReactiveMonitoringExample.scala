@@ -1,7 +1,7 @@
 package iris
 import csw.params.core.generics.KeyType
 import iris.IrisConstants._
-import tmt.ocs.ScriptImports._
+import ocs.framework.ScriptImports._
 
 class ReactiveMonitoringExample(csw: CswServices) extends Script(csw) {
 

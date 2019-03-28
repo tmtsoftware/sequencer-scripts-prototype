@@ -1,7 +1,7 @@
 package iris
 
 import iris.IrisConstants.is
-import tmt.ocs.ScriptImports._
+import ocs.framework.ScriptImports._
 
 import scala.util.control.NonFatal
 
@@ -17,15 +17,17 @@ class StopExample2(csw: CswServices) extends Script(csw) {
       val commandResponse = csw.submitAndSubscribe("myAssembly", mySetup).await
       inLongRunningCommand = false
 
-      AggregateResponse(commandResponse)
+      csw.addOrUpdateCommand(commandResponse)
+      Done
 
     }.recover {
       case NonFatal(exception) =>
         println(s"Command failed: ${exception.getMessage}")
-        AggregateResponse(CommandResponse.Error(command.runId, exception.getMessage))
+        csw.addOrUpdateCommand(CommandResponse.Error(command.runId, exception.getMessage))
+      Done
     }
   }
-  override def onStop(): Future[Done] = {
+  override def abort(): Future[Done] = {
     spawn {
       if (inLongRunningCommand) {
         val abortSetup = Setup(is.prefix, CommandName("abortLongRunningCommand"), None)

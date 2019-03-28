@@ -1,5 +1,5 @@
 package iris
-import tmt.ocs.ScriptImports._
+import ocs.framework.ScriptImports._
 import IrisConstants._
 
 import scala.util.control.NonFatal
@@ -42,7 +42,8 @@ class NextIfExample(csw: CswServices) extends Script(csw) {
         }
       }.await
 
-      AggregateResponse(commandResponse.await)
+      csw.addOrUpdateCommand(commandResponse.await)
+      Done
     }
   }
 }

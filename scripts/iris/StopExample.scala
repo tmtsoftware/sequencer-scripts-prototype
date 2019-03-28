@@ -1,6 +1,6 @@
 package iris
 import iris.IrisConstants.is
-import tmt.ocs.ScriptImports._
+import ocs.framework.ScriptImports._
 
 import scala.util.control.NonFatal
 
@@ -38,10 +38,11 @@ class StopExample(csw: CswServices) extends Script(csw) {
         }
       }.await
 
-      AggregateResponse(commandResponse.await)
+      commandResponse.await
+      Done
     }
   }
-  override def onStop(): Future[Done] = {
+  override def abort(): Future[Done] = {
     spawn {
       sendStopCommand = true
       Done
