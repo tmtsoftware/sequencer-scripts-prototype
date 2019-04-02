@@ -110,42 +110,42 @@ class LGSAcquisition(csw: CswServices) extends Script(csw) {
       val startExposureCommand = Setup(aosq.prefix, CommandName("exposure"), command.maybeObsId)
         .add(oiwfsExposureModeKey.set(probeExpModes:_*))
 
-      csw.addSubCommands(command, Set(startExposureCommand))
+      csw.submitAndSubscribe(oiwfsDetectorAssembly.name, startExposureCommand).await match {
 
-      val response = csw.submitAndSubscribe(oiwfsDetectorAssembly.name, startExposureCommand).await
-
-      csw.updateSubCommand(response)
-
-      val guideStarLockedThreshold = 5  // number of consecutive loops without an offset to consider stable
-      var timesGuideStarLocked: Int = 0
-      val maxAttempts = 20  // maximum number of loops on this guide star before rejecting
-      var attempts = 0
-      loop (500.millis) {  // period tbd
-        spawn {
-          if (ttfFluxLow) {
-            // increase exposure time
-            increaseExposureTime()
-          } else {
-            // gs found (centroid success)
-            if (isOffsetRequired(xoffset, yoffset)) {
-              // offset telescope.  wait for completion
-              val offsetResponse = offsetTcs(tcs.await, xoffset, yoffset, ttfProbeNum, command.maybeObsId).await
-              timesGuideStarLocked = 0
-            } else {
-              timesGuideStarLocked += 1
+        case _: CommandResponse.Completed =>
+          val guideStarLockedThreshold  = 5 // number of consecutive loops without an offset to consider stable
+          var timesGuideStarLocked: Int = 0
+          val maxAttempts               = 20 // maximum number of loops on this guide star before rejecting
+          var attempts                  = 0
+          loop(500.millis) { // period tbd
+            spawn {
+              if (ttfFluxLow) {
+                // increase exposure time
+                increaseExposureTime()
+              } else {
+                // gs found (centroid success)
+                if (isOffsetRequired(xoffset, yoffset)) {
+                  // offset telescope.  wait for completion
+                  val offsetResponse = offsetTcs(tcs.await, xoffset, yoffset, ttfProbeNum, command.maybeObsId).await
+                  timesGuideStarLocked = 0
+                } else {
+                  timesGuideStarLocked += 1
+                }
+              }
+              attempts += 1
+              stopWhen((timesGuideStarLocked == guideStarLockedThreshold) || (attempts == maxAttempts))
             }
-          }
-          attempts += 1
-          stopWhen((timesGuideStarLocked == guideStarLockedThreshold) || (attempts == maxAttempts))
-        }
-      }.await
+          }.await
 
-      subscription.unsubscribe()
-      if (timesGuideStarLocked == guideStarLockedThreshold) {
-        csw.addOrUpdateCommand(CommandResponse.Completed(command.runId))
-      } else {
-        csw.addOrUpdateCommand(CommandResponse.Error(command.runId, "Guide Star Unstable"))
+          if (timesGuideStarLocked == guideStarLockedThreshold) {
+            csw.addOrUpdateCommand(CommandResponse.Completed(command.runId))
+          } else {
+            csw.addOrUpdateCommand(CommandResponse.Error(command.runId, "Guide Star Unstable"))
+          }
+
+        case x => csw.addOrUpdateCommand(CommandResponse.Error(command.runId, "Error starting WFS exposures: " + x))
       }
+      subscription.unsubscribe()
       Done
     }
   }
