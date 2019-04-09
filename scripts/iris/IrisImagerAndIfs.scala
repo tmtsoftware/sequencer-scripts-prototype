@@ -4,7 +4,7 @@ import csw.params.core.generics.{GChoiceKey, Key, KeyType}
 import csw.params.core.models.Choices
 import ocs.framework.ScriptImports._
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 class IrisImagerAndIfs(csw: CswServices) extends Script(csw) {
 
@@ -17,7 +17,7 @@ class IrisImagerAndIfs(csw: CswServices) extends Script(csw) {
 
 
   val scaleChoices: Choices = Choices.from("4", "9", "25", "50")
-  val spectralResolutionChoices = Choices.from("4000-Z", "4000-Y", "4000-J", "4000-H", "4000-K",
+  val spectralResolutionChoices: Choices = Choices.from("4000-Z", "4000-Y", "4000-J", "4000-H", "4000-K",
     "4000-H+K", "8000-Z", "8000-Y", "8000-J", "8000-H", "8000-Kn1-3", "8000-Kn4-5", "8000-Kbb", "10000-Z",
     "10000-Y", "10000-J", "10000-H", "10000-K", "Mirror")
 
@@ -58,8 +58,8 @@ class IrisImagerAndIfs(csw: CswServices) extends Script(csw) {
       }
 
       // exposure parameters
-      val imagerItime   = command(imagerItimeKey).head
-      val imagerRamps   = command(imagerRampsKey).head
+      val imagerItime   = command(imagerItimeKey)
+      val imagerRamps   = command(imagerRampsKey)
       val imagerRepeats = command(imagerRepeatsKey).head
 
       val numIfsConfigs = command(ifsConfigurationsKey).head
@@ -74,14 +74,14 @@ class IrisImagerAndIfs(csw: CswServices) extends Script(csw) {
       val imagerExposureLoop = loop {
         spawn {
           // configure exposure
-          val imagerItimeKey = KeyType.IntKey.make("integrationTime")
-          val imagerRampsKey = KeyType.IntKey.make("ramps")
+          val subImagerItimeKey = KeyType.IntKey.make("integrationTime")
+          val subImagerRampsKey = KeyType.IntKey.make("ramps")
           csw
             .submit(
               "imagerDetectorAssembly",
               Setup(isPrefix, CommandName("configureExposure"), command.maybeObsId)
-                .add(imagerItimeKey.set(ifsItimes.get(imagerExposureCounter).get))
-                .add(imagerRampsKey.set(ifsRamps.get(imagerExposureCounter).get))
+                .add(subImagerItimeKey.set(imagerItime.get(imagerExposureCounter).get))
+                .add(subImagerRampsKey.set(imagerRamps.get(imagerExposureCounter).get))
             )
             .await
           // observe (assumes completes when exposure is complete)

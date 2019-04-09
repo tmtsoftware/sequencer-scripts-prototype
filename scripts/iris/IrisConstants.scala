@@ -68,7 +68,7 @@ object IrisConstants {
   object cryoenvAssembly {
     val prefix = Prefix("iris.sc.cryoenv")
     val name = "cryoenv-assembly"
-    val cryoenvStateEventNames = Set("IMG_STATE", "IFS_STATE", "WIN_STATE", "PV_STATE", "PRESS_STATE")
+    val cryoenvStateEventNames: Set[String] = Set("IMG_STATE", "IFS_STATE", "WIN_STATE", "PV_STATE", "PRESS_STATE")
     val cryoenvVacuumStates: Choices = makeChoices("WARM", "PUMPING", "WARM_VACUUM", "COOLING", "COLD", "WARMING", "PRESSURIZING")
 
     object command { }

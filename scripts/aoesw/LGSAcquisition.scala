@@ -28,31 +28,31 @@ class LGSAcquisition(csw: CswServices) extends Script(csw) {
     val name   = "nfiraos-rtc-assembly"
   }
 
-  val oiwfsExposureModeChoices = Choices.from("SINGLE", "CONTINUOUS", "STOP", "NOOP")
-  val oiwfsExposureModeKey     = KeyType.ChoiceKey.make("mode", oiwfsExposureModeChoices)
+  private val oiwfsExposureModeChoices = Choices.from("SINGLE", "CONTINUOUS", "STOP", "NOOP")
+  private val oiwfsExposureModeKey     = KeyType.ChoiceKey.make("mode", oiwfsExposureModeChoices)
 
-  val oiwfsStateEvent         = EventKey(rtcAssembly.prefix, EventName("oiwfsState"))
-  val oiwfsStateEnableChoices = Choices.from("NONE", "TT", "TTF")
-  val oiwfsStateEnableKey     = KeyType.ChoiceKey.make("enable", oiwfsStateEnableChoices)
-  val oiwfsStateFluxHighKey   = KeyType.BooleanKey.make("fluxHigh")
-  val oiwfsStateFluxLowKey    = KeyType.BooleanKey.make("fluxlow")
+  private val oiwfsStateEvent         = EventKey(rtcAssembly.prefix, EventName("oiwfsState"))
+  private val oiwfsStateEnableChoices = Choices.from("NONE", "TT", "TTF")
+  private val oiwfsStateEnableKey     = KeyType.ChoiceKey.make("enable", oiwfsStateEnableChoices)
+  private val oiwfsStateFluxHighKey   = KeyType.BooleanKey.make("fluxHigh")
+  private val oiwfsStateFluxLowKey    = KeyType.BooleanKey.make("fluxlow")
 
-  val ttfOffsetEvent = EventKey(rtcAssembly.prefix, EventName("telOffloadTt")) // ??
-  val ttfOffsetXKey  = KeyType.FloatKey.make("x")
-  val ttfOffsetYKey  = KeyType.FloatKey.make("y")
+  private val ttfOffsetEvent = EventKey(rtcAssembly.prefix, EventName("telOffloadTt")) // ??
+  private val ttfOffsetXKey  = KeyType.FloatKey.make("x")
+  private val ttfOffsetYKey  = KeyType.FloatKey.make("y")
 
-  val tcsOffsetCoordinateSystemChoices = Choices.from("RADEC", "XY", "ALTAZ")
-  val tcsOffsetCoordSystemKey          = KeyType.ChoiceKey.make("coordinateSystem", tcsOffsetCoordinateSystemChoices)
-  val tcsOffsetXKey                    = KeyType.FloatKey.make("x")
-  val tcsOffsetYKey                    = KeyType.FloatKey.make("y")
-  val tcsOffsetVirtualTelescopeChoices =
+  private val tcsOffsetCoordinateSystemChoices = Choices.from("RADEC", "XY", "ALTAZ")
+  private val tcsOffsetCoordSystemKey          = KeyType.ChoiceKey.make("coordinateSystem", tcsOffsetCoordinateSystemChoices)
+  private val tcsOffsetXKey                    = KeyType.FloatKey.make("x")
+  private val tcsOffsetYKey                    = KeyType.FloatKey.make("y")
+  private val tcsOffsetVirtualTelescopeChoices =
     Choices.from("MOUNT", "OIWFS1", "OIWFS2", "OIWFS3", "OIWFS4", "ODGW1", "ODGW2", "ODGW3", "ODGW4", "GUIDER1", "GUIDER2")
-  val tcsOffsetVTKey = KeyType.ChoiceKey.make("virtualTelescope", tcsOffsetVirtualTelescopeChoices)
+  private val tcsOffsetVTKey = KeyType.ChoiceKey.make("virtualTelescope", tcsOffsetVirtualTelescopeChoices)
 
 
-  val loopEventKey = EventKey(rtcAssembly.prefix, EventName("loop"))
-  val oiwfsLoopStatesChoices = Choices.from("IDLE", "LOST", "ACTIVE")
-  val oiwfsLoopKey = KeyType.ChoiceKey.make("oiwfsPoa", oiwfsLoopStatesChoices)
+  private val loopEventKey = EventKey(rtcAssembly.prefix, EventName("loop"))
+  private val oiwfsLoopStatesChoices = Choices.from("IDLE", "LOST", "ACTIVE")
+  private val oiwfsLoopKey = KeyType.ChoiceKey.make("oiwfsPoa", oiwfsLoopStatesChoices)
 
   csw.subscribe(Set(loopEventKey)) {
     case ev: SystemEvent =>
@@ -153,7 +153,7 @@ class LGSAcquisition(csw: CswServices) extends Script(csw) {
   def increaseExposureTime(): Unit = {
     // not sure how this is done
   }
-  def offsetTcs(tcs: SequencerCommandService, xoffset: Float, yoffset: Float, probeNum: Int, maybeObsId: Option[ObsId]) = {
+  private def offsetTcs(tcs: SequencerCommandService, xoffset: Float, yoffset: Float, probeNum: Int, maybeObsId: Option[ObsId]) = {
     tcs.submit(
       Sequence(
         Setup(aosq.prefix, CommandName("offset"), maybeObsId)
