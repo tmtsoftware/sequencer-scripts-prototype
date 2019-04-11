@@ -7,7 +7,7 @@ class DemoSequencer(csw: CswServices) extends Script(csw) {
   private var eventCount = 0
 
   private val publisherStream = csw.publish(5.seconds) {
-    SystemEvent(Prefix("demo-test"), EventName("system"))
+    Some(SystemEvent(Prefix("demo-test"), EventName("system")))
   }
 
   private val subscriptionStream = csw.subscribe(Set(EventKey("demo-test.system"))) { eventKey =>
