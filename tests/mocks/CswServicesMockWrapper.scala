@@ -23,7 +23,7 @@ object CswServicesMockWrapper {
 class CswServicesMockWrapper(sequencerId: String, observingMode: String, sequencer: SequenceOperator)(implicit system: ActorSystem)
     extends CswServicesMock(sequencerId, observingMode, sequencer) {
 
-  override def submitAndSubscribe(
+  override def submit(
       assemblyName: String,
       command: ControlCommand
   ): Future[SubmitResponse] = {
@@ -40,7 +40,7 @@ class CswServicesMockWrapper(sequencerId: String, observingMode: String, sequenc
           await(FutureUtils.delay(1.seconds)(Executors.newScheduledThreadPool(2)))
           await(submitResponseF)
         }
-      case _ => super.submitAndSubscribe(assemblyName, command)
+      case _ => super.submit(assemblyName, command)
     }
   }
 

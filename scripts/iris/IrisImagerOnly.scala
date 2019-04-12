@@ -33,8 +33,8 @@ class IrisImagerOnly(csw: CswServices) extends Script(csw) {
 
       // send both commands at same time
       var responses = par(
-        csw.submitAndSubscribe(sciFilterAssembly.name, filterCommand),
-        csw.submitAndSubscribe(imagerDetectorAssembly.name, setupImagerCommand)
+        csw.submit(sciFilterAssembly.name, filterCommand),
+        csw.submit(imagerDetectorAssembly.name, setupImagerCommand)
       ).await
 
       csw.updateSubCommand(responses.head)
@@ -104,7 +104,7 @@ class IrisImagerOnly(csw: CswServices) extends Script(csw) {
     spawn {
       if (takeImagerExposures) {
         val observeCommand = Observe(is.prefix, CommandName("START_EXPOSURE"), maybeObsId)
-        val response       = csw.submitAndSubscribe(imagerDetectorAssembly.name, observeCommand).await
+        val response       = csw.submit(imagerDetectorAssembly.name, observeCommand).await
         // check response
       }
       stopWhen(stopExposureLoop) // loop forever.  can be set to true on shutdown.
@@ -128,7 +128,7 @@ class IrisImagerOnly(csw: CswServices) extends Script(csw) {
         case "ABORT" =>
           takeImagerExposures = false
           val observeCommand = Observe(is.prefix, CommandName("ABORT_EXPOSURE"), command.maybeObsId)
-          val response = csw.submitAndSubscribe(imagerDetectorAssembly.name, observeCommand).await
+          val response = csw.submit(imagerDetectorAssembly.name, observeCommand).await
           CommandResponse.withRunId(command.runId, response)
         case x =>
           CommandResponse.Invalid(command.runId,
@@ -149,7 +149,7 @@ class IrisImagerOnly(csw: CswServices) extends Script(csw) {
             loop {
               spawn {
                 val observeCommand = Observe(is.prefix, CommandName("START_EXPOSURE"), maybeObsId)
-                val response       = csw.submitAndSubscribe(imagerDetectorAssembly.name, observeCommand).await
+                val response       = csw.submit(imagerDetectorAssembly.name, observeCommand).await
                 // check response
 
                 // check for failures
@@ -164,7 +164,7 @@ class IrisImagerOnly(csw: CswServices) extends Script(csw) {
         case "ABORT" =>
           stopExposureLoop = true
           val observeCommand = Observe(is.prefix, CommandName("ABORT_EXPOSURE"), command.maybeObsId)
-          val response = csw.submitAndSubscribe(imagerDetectorAssembly.name, observeCommand).await
+          val response = csw.submit(imagerDetectorAssembly.name, observeCommand).await
           CommandResponse.withRunId(command.runId, response)
       }
       csw.addOrUpdateCommand(commandResponse)
@@ -182,7 +182,7 @@ class IrisImagerOnly(csw: CswServices) extends Script(csw) {
       }
 
       val observeCommand = Observe(is.prefix, CommandName(commandName), command.maybeObsId)
-      val response       = csw.submitAndSubscribe(imagerDetectorAssembly.name, observeCommand).await
+      val response       = csw.submit(imagerDetectorAssembly.name, observeCommand).await
       csw.addSubCommands(command, Set(observeCommand))
       csw.updateSubCommand(response)
       Done
