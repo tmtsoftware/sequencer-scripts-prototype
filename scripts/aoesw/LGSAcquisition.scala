@@ -110,7 +110,7 @@ class LGSAcquisition(csw: CswServices) extends Script(csw) {
       val startExposureCommand = Setup(aosq.prefix, CommandName("exposure"), command.maybeObsId)
         .add(oiwfsExposureModeKey.set(probeExpModes:_*))
 
-      csw.submitAndSubscribe(oiwfsDetectorAssembly.name, startExposureCommand).await match {
+      csw.submit(oiwfsDetectorAssembly.name, startExposureCommand).await match {
 
         case _: CommandResponse.Completed =>
           val guideStarLockedThreshold  = 5 // number of consecutive loops without an offset to consider stable
