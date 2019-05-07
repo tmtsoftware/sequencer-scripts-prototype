@@ -31,13 +31,13 @@ class CswServicesMockWrapper(sequencerId: String, observingMode: String, sequenc
       case sciFilterAssembly.name =>
         async {
           println(s"submit and subscribe command fired for $assemblyName")
-          await(FutureUtils.delay(5.seconds)(Executors.newScheduledThreadPool(2)))
+          await(FutureUtils.delay(5.seconds, Executors.newScheduledThreadPool(2)))
           await(submitResponseF)
         }
       case imagerDetectorAssembly.name =>
         async {
           println(s"submit and subscribe command fired for $assemblyName")
-          await(FutureUtils.delay(1.seconds)(Executors.newScheduledThreadPool(2)))
+          await(FutureUtils.delay(1.seconds, Executors.newScheduledThreadPool(2)))
           await(submitResponseF)
         }
       case _ => super.submit(assemblyName, command)

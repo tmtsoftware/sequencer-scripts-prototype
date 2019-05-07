@@ -12,7 +12,7 @@ lazy val `sequencer-scripts` = project
     unmanagedSourceDirectories in Compile += (baseDirectory in Compile) (_ / "scripts").value,
     unmanagedSourceDirectories in Test += (baseDirectory in Test) (_ / "tests").value,
     unmanagedResourceDirectories in Compile += (baseDirectory in Compile) (_ / "configs").value,
-
+    mainClass in reStart := Some("SequencerApp"),
     name := "sequencer-scripts",
     resolvers += "jitpack" at "https://jitpack.io",
     libraryDependencies ++= Seq(
