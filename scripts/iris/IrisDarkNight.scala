@@ -56,6 +56,8 @@ class IrisDarkNight(csw: CswServices) extends IrisShared(csw) {
 
   override def onShutdown(): Future[Done] = spawn {
     println("shutdown iris")
+    publisherStream.cancel()
+    subscriptionStream.unsubscribe().await
     Done
   }
 
