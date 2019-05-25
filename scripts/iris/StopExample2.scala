@@ -14,7 +14,7 @@ class StopExample2(csw: CswServices) extends Script(csw) {
 
       inLongRunningCommand = true
       val mySetup = Setup(is.prefix, CommandName("longRunningCommnad"), command.maybeObsId)
-      val commandResponse = csw.submitAndSubscribe("myAssembly", mySetup).await
+      val commandResponse = csw.submit("myAssembly", mySetup).await
       inLongRunningCommand = false
 
       csw.addOrUpdateCommand(commandResponse)

@@ -12,7 +12,7 @@ class NextIfExample(csw: CswServices) extends Script(csw) {
     spawn {
 
       val mySetup = Setup(is.prefix, CommandName("longRunningCommnad"), command.maybeObsId)
-      val commandFuture = csw.submitAndSubscribe("myAssembly", mySetup)
+      val commandFuture = csw.submit("myAssembly", mySetup)
 
       var commandComplete = false
 

@@ -13,7 +13,7 @@ class StopExample(csw: CswServices) extends Script(csw) {
 
       sendStopCommand = false
       val mySetup = Setup(is.prefix, CommandName("longRunningCommnad"), command.maybeObsId)
-      val commandFuture = csw.submitAndSubscribe("myAssembly", mySetup)
+      val commandFuture = csw.submit("myAssembly", mySetup)
 
       var commandComplete = false
       val commandResponse = {
