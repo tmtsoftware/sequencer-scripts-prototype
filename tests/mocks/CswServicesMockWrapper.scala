@@ -19,9 +19,9 @@ object CswServicesMockWrapper {
     new CswServicesMockWrapper("sequencer1", "mode1", sequencer)
 }
 
-
-class CswServicesMockWrapper(sequencerId: String, observingMode: String, sequencer: SequenceOperator)(implicit system: ActorSystem)
-    extends CswServicesMock(sequencerId, observingMode, sequencer) {
+class CswServicesMockWrapper(sequencerId: String, observingMode: String, sequencer: SequenceOperator)(
+    implicit system: ActorSystem
+) extends CswServicesMock(sequencerId, observingMode, sequencer) {
 
   override def submit(
       assemblyName: String,
