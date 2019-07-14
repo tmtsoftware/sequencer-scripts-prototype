@@ -7,5 +7,5 @@ object Libs {
 
   val `ocs-framework` = Org             %% "ocs-framework" % Version
   val `ocs-testkit`   = Org             %% "ocs-testkit"   % Version
-  val `scalaTest`     = "org.scalatest" %% "scalatest"     % "3.0.4" % Test
+  val `scalaTest`     = "org.scalatest" %% "scalatest"     % "3.0.8" % Test
 }
